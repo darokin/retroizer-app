@@ -1,0 +1,25 @@
+{
+  "name": "retroizer",
+  "version": "1.0.0",
+  "description": "Image processing tool with pixelization and retro effects",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "node build.js",
+    "build:watch": "webpack --watch",
+    "install:no-ssl": "npm install --strict-ssl=false --registry=https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-react": "^7.22.0",
+    "babel-loader": "^9.1.0",
+    "electron": "^37.2.6",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0"
+  }
+}

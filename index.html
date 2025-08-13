@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixert - Image Processing Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="stylesheet" href="src/styles/ui.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #010114;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #p5-container {
+            display: block;
+            position: fixed;
+            left: 260px;
+            width: calc(100vw - 260px);
+            height: 100vh;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="pixert-ui"></div>
+    <div id="p5-container"></div>
+
+    <script src="./src/js/palettes.js"></script>
+    <script src="./src/js/dithering.js"></script>
+    <script src="./src/js/imageProcessor.js"></script>
+    <script src="./dist/ui.bundle.js"></script>
+    <script src="./src/js/sketch.js"></script>
+</body>
+</html>

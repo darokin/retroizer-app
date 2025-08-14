@@ -37,3 +37,15 @@ build
 .vscode/*
 
 *Zone.Identifier
+
+BUILD_SUMMARY.md
+build-report-*.json
+RELEASE_GUIDE.md
+assets/README.md
+
+dist/
+out/
+build/
+release/
+*.log
+*.tmp

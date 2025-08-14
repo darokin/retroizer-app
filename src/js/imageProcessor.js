@@ -72,11 +72,7 @@ class ImageProcessor {
             for (let x = 0; x < pixelWidth; x++) {
                 const pixelColor = this.getAverageColor(x, y, pixelSize);
                 const processedColor = this.applyEffects(pixelColor, x, y);
-                this.processedPixels.push({
-                    x: x,
-                    y: y,
-                    color: processedColor
-                });
+                this.processedPixels.push({x: x, y: y, color: processedColor});
             }
         }
         
@@ -351,7 +347,7 @@ class ImageProcessor {
         
         if (overlayMode > 0 && overlayMode < blendModes.length) {
             canvas.blendMode(blendModes[overlayMode]);
-            canvas.fill(overlayColor[0], overlayColor[1], overlayColor[2]);
+            canvas.fill(overlayColor[0], overlayColor[1], overlayColor[2], overlayOpacity);
             canvas.rect(0, 0, width, height);
             canvas.blendMode(BLEND);
         }

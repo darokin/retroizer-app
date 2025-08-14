@@ -30,11 +30,8 @@ function getBayerValue(matrixName, x, y) {
     if (!matrix) return 0;
     
     const size = matrix.length;
-    const bayerX = x % size;
-    const bayerY = y % size;
-    const maxValue = size * size;
-    
-    return (matrix[bayerY][bayerX] / (maxValue * maxValue)) * 128;
+
+    return (matrix[y % size][x % size] / (size * size)) * 32;
 }
 
 // Application du dithering de Bayer

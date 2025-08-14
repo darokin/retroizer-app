@@ -94,6 +94,10 @@
   border-radius: 2px;
 }
 
+.control-group img {
+  width: 100%;
+}
+
 .checkbox-label {
   display: flex !important;
   align-items: center;

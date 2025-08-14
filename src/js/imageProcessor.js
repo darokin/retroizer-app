@@ -1,6 +1,7 @@
 class ImageProcessor {
     constructor() {
         this.originalImage = null;
+        this.base64Image = null;
         this.processedPixels = [];
         this.currentPalette = [];
         this.settings = this.getDefaultSettings();

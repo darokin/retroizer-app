@@ -7,6 +7,7 @@ import { EffectsSection } from './EffectsSection';
 import { ExportSection } from './ExportSection';
 import { StatusBar } from './StatusBar';
 import { PaletteDisplay } from './PaletteDisplay';
+import { OriginalImageSection } from './OriginalImageSection';
 
 export function PixertUI({ imageProcessor, onUpdate }) {
   const [settings, setSettings] = useState(imageProcessor.settings);
@@ -46,16 +47,17 @@ export function PixertUI({ imageProcessor, onUpdate }) {
       
       if (result) {
         updateStatus('Loading image...');
-        
+
         // Load image with p5.js
         loadImage(result.data, (img) => {
-          imageProcessor.setImage(img);
-          updateStatus(`Image loaded: ${result.path.split('/').pop()} (${img.width}x${img.height})`);
-          updatePaletteDisplay();
-          onUpdate();
+            imageProcessor.setImage(img);
+            imageProcessor.base64Image = result.data;
+            updateStatus(`Image loaded: ${result.path.split('/').pop()} (${img.width}x${img.height})`);
+            updatePaletteDisplay();
+            onUpdate();
         }, (error) => {
-          updateStatus('Error loading image');
-          console.error('Error loading image:', error);
+            updateStatus('Error loading image');
+            console.error('Error loading image:', error);
         });
       }
     } catch (error) {
@@ -118,6 +120,12 @@ export function PixertUI({ imageProcessor, onUpdate }) {
           onLoadImage={handleLoadImage}
         />
         
+        {imageProcessor.base64Image && (
+            <OriginalImageSection 
+                img={imageProcessor.base64Image}
+            /> 
+        )} 
+
         <AdjustmentsSection 
           settings={settings} 
           onUpdate={updateSettings}

@@ -54,6 +54,8 @@ Just check the boxes, slide the sliders and let the magic happen! :sparkles:
   - Overlay opacity
 - :triangular_ruler: Pixel export zoom factor
 
+## Usage
+
 1. Import your image
 2. Tweak all you want
 3. Export your result
@@ -62,4 +64,4 @@ You can select a pixel zoom factor for the exported image to have either a 1:1 p
 
 :heart:
 
-![Screenshot of Retroizer app by darokin](https://darokin.info/github/imgs/retroizer-app_02.jpg)
+![Screenshot of Retroizer app by darokin](https://darokin.info/github/imgs/retroizer-app_02.jpg?)

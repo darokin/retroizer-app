@@ -31,21 +31,6 @@ export function ImageSection({ settings, onUpdate, onLoadImage }) {
           <span className="value">{settings.pixelSize}</span>
         </label>
       </div>
-      
-      <div className="control-group">
-        <label>
-          Output Pixel Size:
-          <input
-            type="range"
-            min="0"
-            max="20"
-            step="1"
-            value={settings.outputPixelSize}
-            onChange={(e) => handleChange('outputPixelSize', parseInt(e.target.value))}
-          />
-          <span className="value">{settings.outputPixelSize}</span>
-        </label>
-      </div>
     </CollapsibleSection>
   );
 } 

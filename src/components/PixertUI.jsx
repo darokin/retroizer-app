@@ -18,10 +18,11 @@ export function PixertUI({ imageProcessor, onUpdate }) {
     updatePaletteDisplay();
   }, [settings]);
 
-  const updateSettings = (newSettings) => {
+  const updateSettings = (newSettings, needVisualUpdate = true) => {
     setSettings({ ...newSettings });
     imageProcessor.updateSettings(newSettings);
-    onUpdate();
+    if (needVisualUpdate)
+        onUpdate();
   };
 
   const updateStatus = (message) => {
@@ -89,24 +90,24 @@ export function PixertUI({ imageProcessor, onUpdate }) {
     }
   };
 
-  const showDebugInfo = () => {
-    const pixelsCount = imageProcessor.getProcessedPixelsCount();
-    const dimensions = imageProcessor.getProcessedDimensions();
+//   const showDebugInfo = () => {
+//     const pixelsCount = imageProcessor.getProcessedPixelsCount();
+//     const dimensions = imageProcessor.getProcessedDimensions();
     
-    const info = [
-      `Processed pixels: ${pixelsCount}`,
-      `Dimensions: ${dimensions.width}x${dimensions.height}`,
-      `Pixel size: ${settings.pixelSize}`,
-      `Grayscale: ${settings.grayscale}`,
-      `Color limit: ${settings.colorLimit} (${settings.colors} colors)`,
-      `Custom palette: ${settings.customPalette} (${settings.paletteType})`,
-      `Dithering: ${settings.dithering} (${settings.ditheringType})`,
-      `Current palette colors: ${palette.length}`
-    ].join('\n');
+//     const info = [
+//       `Processed pixels: ${pixelsCount}`,
+//       `Dimensions: ${dimensions.width}x${dimensions.height}`,
+//       `Pixel size: ${settings.pixelSize}`,
+//       `Grayscale: ${settings.grayscale}`,
+//       `Color limit: ${settings.colorLimit} (${settings.colors} colors)`,
+//       `Custom palette: ${settings.customPalette} (${settings.paletteType})`,
+//       `Dithering: ${settings.dithering} (${settings.ditheringType})`,
+//       `Current palette colors: ${palette.length}`
+//     ].join('\n');
     
-    alert('Debug Info:\n\n' + info);
-    updateStatus('Debug info displayed');
-  };
+//     alert('Debug Info:\n\n' + info);
+//     updateStatus('Debug info displayed');
+//   };
 
   return (
     <div className="pixert-ui">
@@ -138,8 +139,10 @@ export function PixertUI({ imageProcessor, onUpdate }) {
         />
         
         <ExportSection 
+          settings={settings}
+          onUpdate={updateSettings}
           onSaveImage={handleSaveImage}
-          onDebugInfo={showDebugInfo}
+          //onDebugInfo={showDebugInfo}
         />
         
         <PaletteDisplay palette={palette} settings={settings} />

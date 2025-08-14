@@ -1,8 +1,8 @@
 {
   "name": "retroizer",
   "version": "1.0.0",
-  "description": "Image processing tool with pixelization and retro effects",
-  "main": "app.js",
+  "description": "Image processing tool with pixelization, dithering and other retro effects.",
+  "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",

@@ -8,8 +8,9 @@ class ImageProcessor {
     }
     
     getDefaultSettings() {
+        // TODO : Put these defaults values in config.js (?)
         return {
-            pixelSize: 1,
+            pixelSize: 4,
             outputPixelSize: 1,
             brightness: 0,
             contrast: 0,
@@ -49,18 +50,15 @@ class ImageProcessor {
     processImage() {
         if (!this.originalImage) return;
         
-        const { pixelSize } = this.settings;
-
         // Ensure the current palette reflects the latest selection when using a custom palette
         // so that quantization uses the newly selected palette immediately
         if (this.settings.customPalette) {
             this.currentPalette = getPalette(this.settings.paletteType) || [];
         }
-        const img = this.originalImage;
         
-        // Calculer les dimensions en pixels
-        const pixelWidth = Math.floor(img.width / pixelSize);
-        const pixelHeight = Math.floor(img.height / pixelSize);
+        // == Calculate size
+        const pixelWidth = Math.floor(this.originalImage.width / this.settings.pixelSize);
+        const pixelHeight = Math.floor(this.originalImage.height / this.settings.pixelSize);
         
         this.processedPixels = [];
         
@@ -68,17 +66,17 @@ class ImageProcessor {
             this.originalImage.loadPixels();
         }
 
-        // Traitement par blocs de pixels
+        // == Pixel by pixel color deduction
         for (let y = 0; y < pixelHeight; y++) {
             for (let x = 0; x < pixelWidth; x++) {
-                const pixelColor = this.getAverageColor(x, y, pixelSize);
+                const pixelColor = this.getAverageColor(x, y, this.settings.pixelSize);
                 const processedColor = this.applyEffects(pixelColor, x, y);
                 this.processedPixels.push({x: x, y: y, color: processedColor});
             }
         }
         
-        // Mettre à jour la palette si nécessaire
-        this.updatePalette();
+        if (this.settings.colorLimit || this.settings.customPalette)
+            this.updatePalette();
     }
     
     getAverageColor(pixelX, pixelY, size) {
@@ -112,14 +110,14 @@ class ImageProcessor {
         let g = green(inputColor);
         let b = blue(inputColor);
         
-        // Luminosité
+        // == Brighness
         if (this.settings.brightness !== 0) {
             r = this.constrain(r + this.settings.brightness, 0, 255);
             g = this.constrain(g + this.settings.brightness, 0, 255);
             b = this.constrain(b + this.settings.brightness, 0, 255);
         }
         
-        // Contraste
+        // == Contrast
         if (this.settings.contrast !== 0) {
             const factor = (259 * (this.settings.contrast + 255)) / (255 * (259 - this.settings.contrast));
             r = this.constrain(factor * (r - 128) + 128, 0, 255);
@@ -127,7 +125,7 @@ class ImageProcessor {
             b = this.constrain(factor * (b - 128) + 128, 0, 255);
         }
         
-        // Correction gamma
+        // == Gamma correction
         if (this.settings.gamma !== 0) {
             const gammaCorrection = 1.0 / this.map(this.settings.gamma, -10, 10, 0.01, 1.99);
             r = Math.floor(255 * Math.pow(r / 255, gammaCorrection));
@@ -135,7 +133,7 @@ class ImageProcessor {
             b = Math.floor(255 * Math.pow(b / 255, gammaCorrection));
         }
         
-        // Niveaux de gris
+        // == Grayscale
         if (this.settings.grayscale) {
             let grayValue = toGrayscale(r, g, b);
             
@@ -147,8 +145,9 @@ class ImageProcessor {
             }
             
             r = g = b = this.constrain(grayValue, 0, 255);
+
         } else if (this.settings.colorLimit || this.settings.customPalette) {
-            // Dithering avec palette de couleurs
+
             if (this.settings.dithering) {
                 const bayerValue = getBayerValue(this.settings.ditheringType, x, y);
                 r += bayerValue;
@@ -169,7 +168,7 @@ class ImageProcessor {
         
         let finalColor = color(r, g, b);
         
-        // Application de la palette
+        // == Palette nearest color
         if ((this.settings.colorLimit || this.settings.customPalette) && this.currentPalette.length > 0) {
             finalColor = findNearestColor(finalColor, this.currentPalette);
         }
@@ -179,11 +178,14 @@ class ImageProcessor {
     
     updatePalette() {
         if (this.settings.colorLimit) {
-            // Génération automatique de palette avec K-means
+            // == Little tweak so that the processedPixels are from the originalImage
+            // == Otherwise we could be limitating a custom palette....
+            this.settings.colorLimit = false;
+            this.processImage();
+            this.settings.colorLimit = true;
             const pixelColors = this.processedPixels.map(p => p.color);
             this.currentPalette = kMeansQuantize(pixelColors, this.settings.colors);
         } else if (this.settings.customPalette) {
-            // Utilisation d'une palette prédéfinie
             this.currentPalette = getPalette(this.settings.paletteType) || [];
         } else {
             this.currentPalette = [];
@@ -200,139 +202,74 @@ class ImageProcessor {
         };
     }
 
-    /*
-    getCanvasDimensions() {
-        if (!this.originalImage) return { width: 0, height: 0 };
-        return {
-            width: width,
-            height: height
-        };
-         // == calculer dimensions optimales
-        const renderWidth = windowWidth;// - 260; // Fixed sidebar width
-        const renderHeight = windowHeight;
-        const ratioW = renderWidth / this.originalImage.width;//settings.imageWidth;
-        const ratioH = renderHeight / this.originalImage.height;
-        let maxRatio;
-        if (ratioW > ratioH)
+    getRenderCanvasPositionAndSize() {
+        if (!this.originalImage) return { x:0, y:0, width: 0, height: 0 };
+
+        const ratioW = width / this.originalImage.width;
+        const ratioH = height / this.originalImage.height;
+        let maxRatio, _x = 0, _y = 0, _w, _h;
+        if (ratioW > ratioH) 
             maxRatio = ratioH;
         else
             maxRatio = ratioW;
-        console.log("windowWidth [" + windowWidth + "] windowHeight [" + windowHeight + "] renderZone  [" + renderWidth + " , " + renderHeight + "]  render image [" + this.originalImage.width + " , " + this.originalImage.height + "]  ratioW='"+ratioW+"' ratioH'"+ratioH+"'");
-        //renderImgWidth = floor(maxRatio * renderImage.width);
-        //renderImgHeight = floor(maxRatio * renderImage.height);
-        return {
-            width: floor(maxRatio * this.originalImage.width),
-            height: floor(maxRatio * this.originalImage.height)
-        };
-    }
-    */
-    getRenderCanvasPositionAndSize() {
-        if (!this.originalImage) return { width: 0, height: 0 };
-
-         // == calculer dimensions optimales
-         const ratioW = width / this.originalImage.width;//settings.imageWidth;
-         const ratioH = height / this.originalImage.height;
-         let maxRatio, _x = 0, _y = 0, _w, _h;
-         if (ratioW > ratioH) 
-            maxRatio = ratioH;
-         else
-             maxRatio = ratioW;
-         _w = floor(maxRatio * this.originalImage.width)
-         _h = floor(maxRatio * this.originalImage.height)
-         if (ratioW > ratioH) 
+        _w = floor(maxRatio * this.originalImage.width)
+        _h = floor(maxRatio * this.originalImage.height)
+        if (ratioW > ratioH) 
             _x = (width - _w) / 2;
         else 
             _y = (height - _h) / 2;
-         //console.log("windowWidth [" + width + "] windowHeight [" + height + "] render image [" + this.originalImage.width + " , " + this.originalImage.height + "]  ratioW='"+ratioW+"' ratioH'"+ratioH+"'");
-         //renderImgWidth = floor(maxRatio * renderImage.width);
-         //renderImgHeight = floor(maxRatio * renderImage.height);
-         return {
+        return {
             x: _x,
             y: _y,
             width: _w,
             height: _h 
-         };
-
+        };
     }
-    
 
-    renderToCanvas(canvas, renderPixelSize = 8) {
+    updateRenderGraphics(gfx, renderPixelSize = 8) {
 
         if (!this.processedPixels.length) return;
-        
-        const dimensions = this.getProcessedDimensions();
-        const canvasWidth = dimensions.width * renderPixelSize;
-        const canvasHeight = dimensions.height * renderPixelSize;
-        
-        canvas.noStroke();
-        canvas.background(0);
-        
-        /*
-        //const offset = window.getSidebarOffset ? window.getSidebarOffset() : 260;
-        //document.getElementById('p5-container').style.left = offset + 'px';
-        resizeCanvas(windowWidth - offset, windowHeight);
-        */
 
-        /*
-        //const dimensions = this.getCanvasDimensions();
-        const canvasWidth = canvas.width;//dimensions.width;// * renderPixelSize;
-        const canvasHeight = canvas.height;//dimensions.height;// * renderPixelSize;
-        
-        // const offset = window.getSidebarOffset ? window.getSidebarOffset() : 260;
-        // document.getElementById('p5-container').style.left = offset + 'px';
-        // resizeCanvas(canvasWidth, canvasHeight);
-
-        
-        
-        console.log('render to pgraphics. GO [' + canvasWidth + ', ' + canvasHeight + '] in canvas [' + canvas.width + ', ' + canvas.height + '] global widht and height [' + width + ', ' + height + ']');
-
-        // Debug 
-        canvas.fill(255, 0, 0);
-        canvas.rect(0, 0, canvasWidth, canvasHeight);
-        canvas.fill(0, 255, 0);
-        canvas.rect(40, 40, canvasWidth-80, canvasHeight-80);
-        */
-        // Rendu des pixels
+        gfx.noStroke();
+        gfx.background(0);
+       
+        // == Pixels processing
         for (let pixel of this.processedPixels) {
-            canvas.fill(pixel.color);
-            //console.log('FILL [' + (pixel.x * renderPixelSize) + ', ' + (pixel.y * renderPixelSize) + '] whit ' + pixel.color);
-            canvas.rect(
+            gfx.fill(pixel.color);
+            gfx.rect(
                 pixel.x * renderPixelSize, 
                 pixel.y * renderPixelSize, 
                 renderPixelSize, 
                 renderPixelSize
             );
             
-            // Scanlines
-            if (this.settings.scanlines) {
-                this.applyScanlines(canvas, pixel, renderPixelSize);
-            }
+            // == Scanlines
+            if (this.settings.scanlines)
+                this.applyScanlines(gfx, pixel, renderPixelSize);
         }
         
-        drawRenderCanvas()
-        // Overlay
-        if (this.settings.overlayMode > 0) {
-            this.applyOverlay(canvas, canvasWidth, canvasHeight);
-        }
+        // == Overlay
+        if (this.settings.overlayMode > 0)
+            this.applyOverlay(gfx, gfx.width, gfx.height);
     }
     
-    applyScanlines(canvas, pixel, renderPixelSize) {
+    applyScanlines(gfx, pixel, renderPixelSize) {
         const { scanlineType, scanlineOpacity } = this.settings;
         const alpha = this.map(scanlineOpacity, 0, 100, 0, 255);
         
         switch (scanlineType) {
             case 0: // Black horizontal
-                canvas.fill(0, alpha);
+            gfx.fill(0, alpha);
                 break;
             case 1: // Cyan horizontal
-                canvas.fill(0, 255, 255, alpha);
+            gfx.fill(0, 255, 255, alpha);
                 break;
             case 2: // Green horizontal
-                canvas.fill(0, 255, 0, alpha);
+            gfx.fill(0, 255, 0, alpha);
                 break;
         }
         
-        canvas.rect(
+        gfx.rect(
             pixel.x * renderPixelSize,
             pixel.y * renderPixelSize + renderPixelSize / 2,
             renderPixelSize,
@@ -340,17 +277,16 @@ class ImageProcessor {
         );
     }
     
-    applyOverlay(canvas, width, height) {
+    applyOverlay(gfx, width, height) {
         const { overlayMode, overlayColor, overlayOpacity } = this.settings;
         
-        // Modes de mélange p5.js
         const blendModes = [null, ADD, MULTIPLY, OVERLAY, SCREEN];
         
         if (overlayMode > 0 && overlayMode < blendModes.length) {
-            canvas.blendMode(blendModes[overlayMode]);
-            canvas.fill(overlayColor[0], overlayColor[1], overlayColor[2], overlayOpacity);
-            canvas.rect(0, 0, width, height);
-            canvas.blendMode(BLEND);
+            gfx.blendMode(blendModes[overlayMode]);
+            gfx.fill(overlayColor[0], overlayColor[1], overlayColor[2], overlayOpacity);
+            gfx.rect(0, 0, width, height);
+            gfx.blendMode(BLEND);
         }
     }
     
@@ -361,50 +297,39 @@ class ImageProcessor {
         const pixelSize = Math.max(1, this.settings.outputPixelSize);
         const finalPixelSize = pixelSize * (this.settings.scanlines ? 2 : 1);
         
-        // Créer un canvas temporaire pour l'export
-        const exportCanvas = createGraphics(
+        // Créer un Gfx temporaire pour l'export
+        const exportGfx = createGraphics(
             dimensions.width * finalPixelSize,
             dimensions.height * finalPixelSize
         );
         
-        exportCanvas.noStroke();
-        exportCanvas.background(0);
+        exportGfx.noStroke();
+        exportGfx.background(0);
         
-        // Rendu des pixels
         for (let pixel of this.processedPixels) {
-            exportCanvas.fill(pixel.color);
-            exportCanvas.rect(
+          exportGfx.fill(pixel.color);
+          exportGfx.rect(
                 pixel.x * finalPixelSize,
                 pixel.y * finalPixelSize,
                 finalPixelSize,
                 finalPixelSize
             );
             
-            // Scanlines pour l'export
-            if (this.settings.scanlines) {
-                this.applyScanlines(exportCanvas, pixel, finalPixelSize);
-            }
+            if (this.settings.scanlines) 
+                this.applyScanlines(exportGfx, pixel, finalPixelSize);
         }
+
+        if (this.settings.overlayMode > 0)
+            this.applyOverlay(exportGfx, exportGfx.width, exportGfx.height);
         
-        // Overlay pour l'export
-        if (this.settings.overlayMode > 0) {
-            this.applyOverlay(
-                exportCanvas, 
-                dimensions.width * finalPixelSize,
-                dimensions.height * finalPixelSize
-            );
-        }
-        
-        // Créer une copie de l'image avant de supprimer le canvas
-        const imageData = exportCanvas.elt.toDataURL('image/png');
-        
-        // Supprimer le canvas temporaire
-        exportCanvas.remove();
+        // == Save GFX data to return and kill useless Gfx
+        const imageData = exportGfx.elt.toDataURL('image/png');
+        exportGfx.remove();
         
         return imageData;
     }
     
-    // Fonctions utilitaires
+    // == UTILS
     constrain(value, min, max) {
         return Math.max(min, Math.min(max, value));
     }
@@ -413,6 +338,7 @@ class ImageProcessor {
         return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
     }
     
+    // == Accessors for UI component
     getCurrentPalette() {
         return this.currentPalette;
     }

@@ -5,25 +5,25 @@ const fs = require('fs');
 let mainWindow;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      enableRemoteModule: false,
-      preload: path.join(__dirname, 'src/js/preload.js')
-    }
-  });
+    mainWindow = new BrowserWindow({
+        width: 1400,  // APP_CONFIG.WINDOW.WIDTH
+        height: 900,  // APP_CONFIG.WINDOW.HEIGHT
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            enableRemoteModule: false,
+            preload: path.join(__dirname, 'src/js/preload.js')
+        }
+    });
 
-  mainWindow.loadFile('index.html');
-  
-  if (process.argv.includes('--dev')) {
-    mainWindow.webContents.openDevTools();
-  }
+    mainWindow.loadFile('index.html');
+
+    if (process.argv.includes('--dev')) {
+        mainWindow.webContents.openDevTools();
+    }
 }
 
-// Gestionnaire pour ouvrir le dialogue de fichier
+// == Open dialog box handling
 ipcMain.handle('open-file-dialog', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
@@ -44,8 +44,8 @@ ipcMain.handle('open-file-dialog', async () => {
   return null;
 });
 
-// Gestionnaire pour sauvegarder l'image
-ipcMain.handle('save-image', async (event, imageData) => {
+// == Export image dialog box handling
+ipcMain.handle('save-image', async (_, imageData) => {
   const result = await dialog.showSaveDialog(mainWindow, {
     filters: [
       { name: 'PNG Images', extensions: ['png'] }

@@ -1,73 +1,63 @@
-// Variables globales
+// == Global variables
 let imageProcessor;
-let renderCanvas;
+let renderGfx;
 let logoImage;
 
-// Paramètres de rendu
-const RENDER_PIXEL_SIZE = 2;//8;
+const RENDER_PIXEL_SIZE = APP_CONFIG.RENDER.PIXEL_SIZE;
 
 function preload() {
-    // Vous pouvez charger des logos ou images de démarrage ici
     // logoImage = loadImage('assets/logo.png');
 }
 
 function setup() {
-    // Nettoyer les canvas cachés existants
-    //cleanupHiddenCanvases();
     
-    // Créer le canvas principal avec la taille de la zone disponible
-    const canvas = createCanvas(windowWidth - 260, windowHeight);
+    // == Canvas init 
+    //  We don't use windowWidth and windowHeight to create the canvasbecause p5js is initialized BEFORE the window 
+    const canvasWidth = APP_CONFIG.WINDOW.WIDTH - APP_CONFIG.SIDEBAR.WIDTH;
+    const canvasHeight = APP_CONFIG.WINDOW.HEIGHT;
+    const canvas = createCanvas(canvasWidth, canvasHeight);
     canvas.parent('p5-container');
+    background(...APP_CONFIG.RENDER.BACKGROUND_COLOR);
+    noStroke();
     
-    // Initialiser le processeur d'images
+    // == Image processor init
     imageProcessor = new ImageProcessor();
     
-    // Initialiser l'interface React
+    // == GUI init
     if (window.initPixertUI) {
         window.initPixertUI(imageProcessor, updateRender);
     }
-    
-    // Configuration initiale
-    background(12, 12, 12);
-    noStroke();
-    
-    // Afficher le message de démarrage
+
     displayWelcomeMessage();
-    
-    console.log('Pixert initialized successfully');
-    
-    // Nettoyer les canvas cachés périodiquement
-    //setInterval(cleanupHiddenCanvases, 5000); // Toutes les 5 secondes
 }
 
+
 function draw() {
-    // Le rendu se fait principalement via updateRender()
-    // draw() reste disponible pour d'autres animations si nécessaire
+    // == Rendering done via updateRender() (can still use draw to animate things)
 }
 
 function updateRender() {
-    background(12, 12, 12);
+    background(...APP_CONFIG.RENDER.BACKGROUND_COLOR);
 
     if (imageProcessor.originalImage && imageProcessor.processedPixels.length > 0) {
+
         const dimensions = imageProcessor.getProcessedDimensions();
         const renderWidth = dimensions.width * RENDER_PIXEL_SIZE;
         const renderHeight = dimensions.height * RENDER_PIXEL_SIZE;
 
-        // Détruire l'ancien canvas si la taille change
-        if (renderCanvas && (renderCanvas.width !== renderWidth || renderCanvas.height !== renderHeight)) {
-            renderCanvas.remove(); // Supprime l'ancien canvas p5
-            renderCanvas = null;
+        // == Destroy old GFX if size changes (loading new image)
+        if (renderGfx && (renderGfx.width !== renderWidth || renderGfx.height !== renderHeight)) {
+          renderGfx.remove();
+          renderGfx = null;
         }
 
-        // Créer un nouveau canvas si nécessaire
-        if (!renderCanvas) {
-            renderCanvas = createGraphics(renderWidth, renderHeight);
-            console.log('New render canvas...');
-        }
+        // == Build GFX for rendering
+        if (!renderGfx) 
+            renderGfx = createGraphics(renderWidth, renderHeight);
 
-        imageProcessor.renderToCanvas(renderCanvas, RENDER_PIXEL_SIZE);
-        drawRenderCanvas();
+        imageProcessor.updateRenderGraphics(renderGfx, RENDER_PIXEL_SIZE);
 
+        drawGfxToCanvas();
         displayImageInfo(dimensions, 5, 5);
     } else {
         displayWelcomeMessage();
@@ -78,29 +68,24 @@ function updateRender() {
     }
 }
 
-function drawRenderCanvas() {
-    //console.log('drawRenderCanvas()');
-    if (!renderCanvas) return;
-
+function drawGfxToCanvas() {
     const dimensions = imageProcessor.getRenderCanvasPositionAndSize();
-
-    //console.log('drawRenderCanvas dimensions [' + dimensions.width + ', ' + dimensions.height + ']');
-    image(renderCanvas, dimensions.x, dimensions.y, dimensions.width, dimensions.height);
+    image(renderGfx, dimensions.x, dimensions.y, dimensions.width, dimensions.height);
 }
 
 function displayWelcomeMessage() {
-    fill(255, 255, 255, 180);
+    fill(...APP_CONFIG.UI.TEXT_COLOR, 180);
     textAlign(CENTER, CENTER);
-    textSize(24);
-    text('Pixert - Image Processing Tool', width/2, height/2 - 40);
+    textSize(28);
+    text('RETROIZER - Image Processing Tool', width/2, height/2 - 60);
     
-    textSize(16);
-    fill(255, 255, 0);
-    text('Click "Load Image" to start processing', width/2, height/2);
+    textSize(18);
+    fill(...APP_CONFIG.UI.ACCENT_COLOR, 255);
+    text('Click "Load Image" to start processing', width/2, height/2 - 20);
     
-    textSize(12);
-    fill(255, 255, 255, 120);
-    text('Features: Pixelization • Dithering • Color Palettes • Effects', width/2, height/2 + 30);
+    textSize(14);
+    fill(...APP_CONFIG.UI.SECONDARY_COLOR, 255);
+    text('Features: Pixelization • Dithering • Color Palettes • Effects', width/2, height/2 + 20);
 }
 
 function displayImageInfo(dimensions, x, y) {
@@ -144,11 +129,24 @@ function getActiveEffects() {
 }
 
 function windowResized() {
-    // Redimensionner le canvas principal à la taille de la zone disponible
-    resizeCanvas(windowWidth - 260, windowHeight);
-    
-    // Nettoyer les canvas cachés avant de mettre à jour
-    //cleanupHiddenCanvases();
+    // console.log("windowResized() start");
+
+    // // Vérifier que les dimensions de la fenêtre sont valides
+    // if (windowWidth <= 0 || windowHeight <= 0) {
+    //     console.log("windowResized() called with invalid dimensions:", windowWidth, 'x', windowHeight);
+    //     return;
+    // }
+
+    // if (imageProcessor == null) {
+    //     console.log("windowResized() call finalSetup(", APP_CONFIG.WINDOW.WIDTH, ',', APP_CONFIG.WINDOW.HEIGHT);
+    //     finalSetup(APP_CONFIG.WINDOW.WIDTH, APP_CONFIG.WINDOW.HEIGHT);
+    //     return;
+    // }
+
+    // console.log("windowResized() call resizeCanvas(", (windowWidth - APP_CONFIG.SIDEBAR.WIDTH), ',', windowHeight);
+
+    // // Redimensionner le canvas principal à la taille de la zone disponible
+    resizeCanvas(windowWidth - APP_CONFIG.SIDEBAR.WIDTH, windowHeight);
     
     updateRender();
 }
@@ -233,7 +231,7 @@ function showHelpDialog() {
     alert(helpText);
 }
 
-// Gestion des erreurs globales
+// == ERROR handling
 window.onerror = function(msg, url, lineNo, columnNo, error) {
     console.error('Global error:', {
         message: msg,
@@ -242,36 +240,15 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
         column: columnNo,
         error: error
     });
-    
-    // Afficher un message d'erreur à l'utilisateur
-    if (gui) {
-        gui.updateStatus('An error occurred. Check console for details.');
-    }
+
+    if (gui)
+        gui.updateStatus('ERROR : ', msg);
     
     return false;
 };
 
-// Fonction pour nettoyer les canvas cachés
-// function cleanupHiddenCanvases() {
-//     // Trouver tous les canvas avec display: none
-//     const hiddenCanvases = document.querySelectorAll('canvas[style*="display: none"]');
-    
-//     console.log(`Nettoyage de ${hiddenCanvases.length} canvas cachés`);
-    
-//     // Supprimer chaque canvas caché
-//     hiddenCanvases.forEach(canvas => {
-//         if (canvas.parentNode) {
-//             canvas.parentNode.removeChild(canvas);
-//         }
-//     });
-// }
-
-// Nettoyage à la fermeture
+// Closing cleanup
 window.addEventListener('beforeunload', function() {
-    if (gui) {
+    if (gui)
         gui.destroy();
-    }
-    
-    // Nettoyer les canvas cachés avant de fermer
-    //cleanupHiddenCanvases();
 });

@@ -37,6 +37,7 @@ export function EffectsSection({ settings, onUpdate }) {
                 <option value={0}>Black</option>
                 <option value={1}>Cyan</option>
                 <option value={2}>Green</option>
+                <option value={3}>Red</option>
               </select>
             </label>
           </div>

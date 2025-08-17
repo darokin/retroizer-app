@@ -259,13 +259,16 @@ class ImageProcessor {
         
         switch (scanlineType) {
             case 0: // Black horizontal
-            gfx.fill(0, alpha);
+                gfx.fill(0, alpha);
                 break;
             case 1: // Cyan horizontal
-            gfx.fill(0, 255, 255, alpha);
+                gfx.fill(0, 255, 255, alpha);
                 break;
             case 2: // Green horizontal
-            gfx.fill(0, 255, 0, alpha);
+                gfx.fill(0, 255, 0, alpha);
+                break;
+            case 3: // Red horizaontal
+                gfx.fill(255, 0, 0, alpha);
                 break;
         }
         

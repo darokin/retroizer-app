@@ -25,7 +25,9 @@ class ImageProcessor {
             ditheringType: 'Bayer 2x2',
             ditheringNoise: 0,
             scanlines: false,
-            scanlineType: 0,
+            //scanlineType: 0,
+            scanlineMode: 0,
+            scanlineColor: 0,
             scanlineOpacity: 50,
             overlayMode: 0,
             overlayColor: [255, 0, 255],
@@ -265,31 +267,43 @@ class ImageProcessor {
             this.applyOverlay(gfx, gfx.width, gfx.height);
     }
     
+// ┌───────────┬───────────────────────────┬──────────────────────────────────────────────────┐
+// │ SCANLINES │ BLACK                     │ COLOR                                            │
+// ├───────────┼───────────────────────────┼──────────────────────────────────────────────────┤
+// │ BLEND     │ Hard but multiply  better │ Weird, multiply better                           │
+// │ ADD       │ Nothing                   │ Colorize too much                                │
+// │ MULTIPLY  │ ✓ HARD                    │  ✓ DULL (on black) strong on white              │
+// │ OVERLAY   │ ✓ SOFT                    │  ✓ BRIGHT (on black) (more additive)            │
+// │ SCREEN    │ Nothing                   │ Meh?!                                            │
+// └───────────┴───────────────────────────┴──────────────────────────────────────────────────┘
+
     applyScanlines(gfx, pixel, renderPixelSize) {
-        const { scanlineType, scanlineOpacity } = this.settings;
+        const { scanlineColor, scanlineMode, scanlineOpacity } = this.settings;
         const alpha = this.map(scanlineOpacity, 0, 100, 0, 255);
-        
-        switch (scanlineType) {
+        const blendModes = [BLEND, ADD, MULTIPLY, OVERLAY, SCREEN];
+
+        switch (scanlineColor) {
             case 0: // Black horizontal
-                gfx.fill(0, alpha);
-                break;
+            gfx.fill(0, alpha);
+            break;
             case 1: // Cyan horizontal
-                gfx.fill(0, 255, 255, alpha);
-                break;
+            gfx.fill(0, 255, 255, alpha);
+            break;
             case 2: // Green horizontal
-                gfx.fill(0, 255, 0, alpha);
-                break;
+            gfx.fill(0, 255, 0, alpha);
+            break;
             case 3: // Red horizaontal
-                gfx.fill(255, 0, 0, alpha);
-                break;
+            gfx.fill(255, 0, 0, alpha);
+            break;
         }
-        
+        gfx.blendMode(blendModes[scanlineMode]);
         gfx.rect(
             pixel.x * renderPixelSize,
             pixel.y * renderPixelSize + renderPixelSize / 2,
             renderPixelSize,
             renderPixelSize / 2
         );
+        gfx.blendMode(BLEND);
     }
     
     applyOverlay(gfx, width, height) {

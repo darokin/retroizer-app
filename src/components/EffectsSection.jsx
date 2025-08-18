@@ -25,14 +25,32 @@ export function EffectsSection({ settings, onUpdate }) {
         </label>
       </div>
       
+      {/* {settings.scanlineMode && ( */}
       {settings.scanlines && (
         <>
+    
+          <div className="control-group">
+            <label>
+            Scanline Mode:
+            <select
+                value={settings.scanlineMode}
+                onChange={(e) => handleChange('scanlineMode', parseInt(e.target.value))}
+            >
+                <option value={0}>None</option>
+                <option value={1}>Add</option>
+                <option value={2}>Multiply</option>
+                <option value={3}>Overlay</option>
+                <option value={4}>Screen</option>
+            </select>
+            </label>
+          </div>
+
           <div className="control-group">
             <label>
               Scanline Type:
               <select
-                value={settings.scanlineType}
-                onChange={(e) => handleChange('scanlineType', parseInt(e.target.value))}
+                value={settings.scanlineColor}
+                onChange={(e) => handleChange('scanlineColor', parseInt(e.target.value))}
               >
                 <option value={0}>Black</option>
                 <option value={1}>Cyan</option>
@@ -41,7 +59,7 @@ export function EffectsSection({ settings, onUpdate }) {
               </select>
             </label>
           </div>
-          
+
           <div className="control-group">
             <label>
               Scanline Opacity:

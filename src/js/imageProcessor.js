@@ -2,7 +2,8 @@ class ImageProcessor {
     constructor() {
         this.originalImage = null;
         this.base64Image = null;
-        this.processedPixels = [];
+        this.processedPixels = []; // fully rendered pixels
+        this.pixelsColors = []; // only basic avg color pixel without effect (for color limited palette deduction)
         this.currentPalette = [];
         this.settings = this.getDefaultSettings();
     }
@@ -35,32 +36,47 @@ class ImageProcessor {
     setImage(img) {
         this.originalImage = img;
         if (img && img.loadPixels) {
-            img.loadPixels(); // <-- Ajoute ceci
+            img.loadPixels();
         }
         this.processImage();
-    }
-    
-    updateSettings(newSettings) {
-        Object.assign(this.settings, newSettings);
-        if (this.originalImage) {
+
+        // == Recalculate color limited palette with average color of the new pic and reprocess it
+        if (this.settings.colorLimit) {
+            this.updatePalette();
             this.processImage();
         }
     }
     
+    updateSettings(newSettings) {
+        // == Update palette only if palette related settings are changed
+        const bUpdatePalette = (
+               newSettings.grayscale != this.settings.grayscale
+            || newSettings.colorLimit != this.settings.colorLimit
+            || newSettings.colors != this.settings.colors
+            || newSettings.customPalette != this.settings.customPalette
+            || newSettings.paletteType != this.settings.paletteType
+        );
+
+        // == Update all settings
+        Object.assign(this.settings, newSettings);
+        
+        // == Update palette if necessary (with the new settings)
+        if (bUpdatePalette)
+            this.updatePalette();
+
+        // == Update rendered image
+        this.processImage();
+    }
+    
     processImage() {
         if (!this.originalImage) return;
-        
-        // Ensure the current palette reflects the latest selection when using a custom palette
-        // so that quantization uses the newly selected palette immediately
-        if (this.settings.customPalette) {
-            this.currentPalette = getPalette(this.settings.paletteType) || [];
-        }
         
         // == Calculate size
         const pixelWidth = Math.floor(this.originalImage.width / this.settings.pixelSize);
         const pixelHeight = Math.floor(this.originalImage.height / this.settings.pixelSize);
         
         this.processedPixels = [];
+        this.pixelsColors = [];
         
         if (this.originalImage.loadPixels) {
             this.originalImage.loadPixels();
@@ -70,13 +86,11 @@ class ImageProcessor {
         for (let y = 0; y < pixelHeight; y++) {
             for (let x = 0; x < pixelWidth; x++) {
                 const pixelColor = this.getAverageColor(x, y, this.settings.pixelSize);
+                this.pixelsColors.push(pixelColor);
                 const processedColor = this.applyEffects(pixelColor, x, y);
                 this.processedPixels.push({x: x, y: y, color: processedColor});
             }
         }
-        
-        if (this.settings.colorLimit || this.settings.customPalette)
-            this.updatePalette();
     }
     
     getAverageColor(pixelX, pixelY, size) {
@@ -85,7 +99,13 @@ class ImageProcessor {
         
         const startX = pixelX * size;
         const startY = pixelY * size;
-        
+
+        // TODO : Is it really a necessary optimization?
+        // if (size === 1) {
+        //     const index = (startY * img.width + startX) * 4;
+        //     return color(img.pixels[index], img.pixels[index + 1], img.pixels[index + 2]);
+        // }
+
         for (let y = startY; y < Math.min(startY + size, img.height); y++) {
             for (let x = startX; x < Math.min(startX + size, img.width); x++) {
                 const index = (y * img.width + x) * 4;
@@ -178,13 +198,7 @@ class ImageProcessor {
     
     updatePalette() {
         if (this.settings.colorLimit) {
-            // == Little tweak so that the processedPixels are from the originalImage
-            // == Otherwise we could be limitating a custom palette....
-            this.settings.colorLimit = false;
-            this.processImage();
-            this.settings.colorLimit = true;
-            const pixelColors = this.processedPixels.map(p => p.color);
-            this.currentPalette = kMeansQuantize(pixelColors, this.settings.colors);
+            this.currentPalette = kMeansQuantize(this.pixelsColors, this.settings.colors);
         } else if (this.settings.customPalette) {
             this.currentPalette = getPalette(this.settings.paletteType) || [];
         } else {
@@ -195,10 +209,9 @@ class ImageProcessor {
     getProcessedDimensions() {
         if (!this.originalImage) return { width: 0, height: 0 };
         
-        const { pixelSize } = this.settings;
         return {
-            width: Math.floor(this.originalImage.width / pixelSize),
-            height: Math.floor(this.originalImage.height / pixelSize)
+            width: Math.floor(this.originalImage.width / this.settings.pixelSize),
+            height: Math.floor(this.originalImage.height / this.settings.pixelSize)
         };
     }
 
@@ -227,7 +240,6 @@ class ImageProcessor {
     }
 
     updateRenderGraphics(gfx, renderPixelSize = 8) {
-
         if (!this.processedPixels.length) return;
 
         gfx.noStroke();
@@ -300,7 +312,7 @@ class ImageProcessor {
         const pixelSize = Math.max(1, this.settings.outputPixelSize);
         const finalPixelSize = pixelSize * (this.settings.scanlines ? 2 : 1);
         
-        // Créer un Gfx temporaire pour l'export
+        // == Temporary Gfx for export
         const exportGfx = createGraphics(
             dimensions.width * finalPixelSize,
             dimensions.height * finalPixelSize
@@ -332,7 +344,7 @@ class ImageProcessor {
         return imageData;
     }
     
-    // == UTILS
+    // == UTILS ===========================================================
     constrain(value, min, max) {
         return Math.max(min, Math.min(max, value));
     }

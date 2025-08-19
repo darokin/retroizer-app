@@ -3,7 +3,8 @@ import { ImageSection } from './ImageSection';
 import { AdjustmentsSection } from './AdjustmentsSection';
 import { ColorsSection } from './ColorsSection';
 import { DitheringSection } from './DitheringSection';
-import { EffectsSection } from './EffectsSection';
+import { ScanlinesSection } from './ScanlinesSection';
+import { OverlaySection } from './OverlaySection';
 import { ExportSection } from './ExportSection';
 import { StatusBar } from './StatusBar';
 import { PaletteDisplay } from './PaletteDisplay';
@@ -141,7 +142,12 @@ export function PixertUI({ imageProcessor, onUpdate }) {
           onUpdate={updateSettings}
         />
         
-        <EffectsSection 
+        <ScanlinesSection 
+          settings={settings} 
+          onUpdate={updateSettings}
+        />
+
+        <OverlaySection 
           settings={settings} 
           onUpdate={updateSettings}
         />

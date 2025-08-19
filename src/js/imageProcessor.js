@@ -1,3 +1,5 @@
+import { SCANLINES_DATA } from './globals.js';
+
 class ImageProcessor {
     constructor() {
         this.originalImage = null;
@@ -277,26 +279,71 @@ class ImageProcessor {
 // │ SCREEN    │ Nothing                   │ Meh?!                                            │
 // └───────────┴───────────────────────────┴──────────────────────────────────────────────────┘
 
+
+// ┌────────────────────────────┬────────────────────────────────────────────┐
+// │ TYPE                       │ DESCRIPTION                                │
+// ├────────────────────────────┼────────────────────────────────────────────┤
+// │ 1:2 Horizontal             │ 2 lignes sur 4 horizontales                │
+// │ 1:2 Horizontal Soft        │ 2 lignes horizontales, opacité dégressive  │
+// │ 1:2 Vertical               │ 2 lignes sur 4 verticales                  │
+// │ 1:2 Vertical Soft          │ 2 lignes verticales, opacité dégressive    │
+// │ 1:3 Horizontal Fade        │ 1 ligne sur 3 avec dégradé (pixels 6x6)    │
+// │ Full Horizontal Band       │ Bande pleine horizontale                   │
+// │ Full Vertical Band         │ Bande pleine verticale                     │
+// │ Grid Cross                 │ Croisement horizontal + vertical           │
+// │ Diagonal Slash             │ Scanlines en diagonale                     │
+// │ Checkerboard               │ Motif damier (1 sur 2 en X et Y)           │
+// └────────────────────────────┴────────────────────────────────────────────┘
+
+// ┌─────────────────────┬────────────┬─────────┬──────────────────────────────┬──────────────┐
+// │ MODE                │ BLEND      │ COULEUR │ DESCRIPTION                  │ OPACITÉ PAR D│
+// ├─────────────────────┼────────────┼─────────┼──────────────────────────────┼──────────────┤
+// │ DARKEN HARD         │ Multiply   │ Noir    │ Contraste fort               │ 20%          │
+// │ DARKEN SOFT         │ Overlay    │ Noir    │ Effet doux                   │ 15%          │
+// │ COLORIZE VIVID      │ Overlay    │ Couleur │ Lumineux sur zones sombres   │ 12%          │
+// │ COLORIZE SUBTLE     │ Multiply   │ Couleur │ Doux sur zones claires       │ 10%          │
+// │ GLOW STRIPE         │ Add        │ Couleur │ Effet néon / synthwave       │ 8%           │
+// │ FADE STRIPE         │ Screen     │ Couleur │ Effet diffus, peu contrasté  │ 6%           │
+// │ NOISE STRIPE        │ Overlay    │ Couleur │ Opacité aléatoire            │ 10% ±5%      │
+// │ STATIC STRIPE       │ Blend      │ Noir    │ Scanline simple              │ 10%          │
+// └─────────────────────┴────────────┴─────────┴──────────────────────────────┴──────────────┘
+
     applyScanlines(gfx, pixel, renderPixelSize) {
         const { scanlineColor, scanlineMode, scanlineOpacity } = this.settings;
         const alpha = this.map(scanlineOpacity, 0, 100, 0, 255);
         const blendModes = [BLEND, ADD, MULTIPLY, OVERLAY, SCREEN];
 
-        switch (scanlineColor) {
-            case 0: // Black horizontal
-            gfx.fill(0, alpha);
-            break;
-            case 1: // Cyan horizontal
-            gfx.fill(0, 255, 255, alpha);
-            break;
-            case 2: // Green horizontal
-            gfx.fill(0, 255, 0, alpha);
-            break;
-            case 3: // Red horizaontal
-            gfx.fill(255, 0, 0, alpha);
-            break;
-        }
-        gfx.blendMode(blendModes[scanlineMode]);
+        // switch (scanlineColor) {
+        //     case 0: // Black horizontal
+        //     gfx.fill(0, alpha);
+        //     break;
+        //     case 1: // Cyan horizontal
+        //     gfx.fill(0, 255, 255, alpha);
+        //     break;
+        //     case 2: // Green horizontal
+        //     gfx.fill(0, 255, 0, alpha);
+        //     break;
+        //     case 3: // Red horizaontal
+        //     gfx.fill(255, 0, 0, alpha);
+        //     break;
+        // }
+
+        // switch (scanlineColor) {
+        //     case : // Black horizontal
+        //     gfx.fill(0, alpha);
+        //     break;
+        //     case 1: // Cyan horizontal
+        //     gfx.fill(0, 255, 255, alpha);
+        //     break;
+        //     case 2: // Green horizontal
+        //     gfx.fill(0, 255, 0, alpha);
+        //     break;
+        //     case 3: // Red horizaontal
+        //     gfx.fill(255, 0, 0, alpha);
+        //     break;
+        // }
+
+        //gfx.blendMode(blendModes[scanlineMode]);
         gfx.rect(
             pixel.x * renderPixelSize,
             pixel.y * renderPixelSize + renderPixelSize / 2,

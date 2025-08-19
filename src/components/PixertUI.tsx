@@ -10,6 +10,9 @@ import { StatusBar } from './StatusBar';
 import { PaletteDisplay } from './PaletteDisplay';
 import { OriginalImageSection } from './OriginalImageSection';
 
+// Déclarations globales
+declare function loadImage(src: string, successCallback: (img: any) => void, errorCallback: (error: any) => void): void;
+
 export function PixertUI({ imageProcessor, onUpdate }) {
   const [settings, setSettings] = useState(imageProcessor.settings);
   const [status, setStatus] = useState('Select an image to start processing');
@@ -39,12 +42,12 @@ export function PixertUI({ imageProcessor, onUpdate }) {
 
   const handleLoadImage = async () => {
     try {
-      if (!window.electronAPI) {
+      if (!(window as any).electronAPI) {
         updateStatus('Electron API not available');
         return;
       }
       
-      const result = await window.electronAPI.invoke('open-file-dialog');
+      const result = await (window as any).electronAPI.invoke('open-file-dialog');
       
       if (result) {
         updateStatus('Loading image...');
@@ -75,12 +78,12 @@ export function PixertUI({ imageProcessor, onUpdate }) {
         return;
       }
       
-      if (!window.electronAPI) {
+      if (!(window as any).electronAPI) {
         updateStatus('Electron API not available');
         return;
       }
       
-      const result = await window.electronAPI.invoke('save-image', imageData);
+      const result = await (window as any).electronAPI.invoke('save-image', imageData);
       
       if (result) {
         updateStatus(`Image saved: ${result.split('/').pop()}`);

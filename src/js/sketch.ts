@@ -1,7 +1,50 @@
+// Déclarations globales pour p5.js
+
+import { APP_CONFIG } from "./config";
+
+// APP_CONFIG est importé depuis config.ts
+declare class ImageProcessor {
+    constructor();
+    settings: any;
+    base64Image: string | null;
+    originalImage: any;
+    processedPixels: any[];
+    setImage(img: any): void;
+    processImage(): void;
+    updatePalette(): void;
+    updateRenderGraphics(gfx: any, pixelSize?: number): void;
+    getRenderCanvasPositionAndSize(): any;
+    exportImage(): string | null;
+    getCurrentPalette(): any[];
+    getProcessedPixelsCount(): number;
+    getProcessedDimensions(): any;
+}
+declare function createCanvas(w: number, h: number): any;
+declare function createGraphics(w: number, h: number): any;
+declare function background(...args: any[]): void;
+declare function noStroke(): void;
+declare function image(img: any, x: number, y: number, w?: number, h?: number): void;
+declare function fill(...args: any[]): void;
+declare function textAlign(xAlign: any, yAlign: any): void;
+declare function textSize(size: number): void;
+declare function text(str: string, x: number, y: number): void;
+declare function resizeCanvas(w: number, h: number): void;
+declare const width: number;
+declare const height: number;
+declare const windowWidth: number;
+declare const windowHeight: number;
+declare const CENTER: any;
+declare const LEFT: any;
+declare const TOP: any;
+declare const key: string;
+declare const gui: any;
+
+// Ajout d'initPixertUI à window comme propriété dynamique
+
 // == Global variables
-let imageProcessor;
-let renderGfx;
-let logoImage;
+let imageProcessor: ImageProcessor;
+let renderGfx: any;
+let logoImage: any;
 
 const RENDER_PIXEL_SIZE = APP_CONFIG.RENDER.PIXEL_SIZE;
 
@@ -24,8 +67,8 @@ function setup() {
     imageProcessor = new ImageProcessor();
     
     // == GUI init
-    if (window.initPixertUI) {
-        window.initPixertUI(imageProcessor, updateRender);
+    if ((window as any).initPixertUI) {
+        (window as any).initPixertUI(imageProcessor, updateRender);
     }
 
     displayWelcomeMessage();

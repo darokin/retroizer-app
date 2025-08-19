@@ -1,5 +1,5 @@
 // Configuration globale
-const APP_CONFIG = {
+export const APP_CONFIG: any = {
     // Dimensions de la fenêtre principale
     WINDOW: {
         WIDTH: 1400,
@@ -31,7 +31,5 @@ const APP_CONFIG = {
     }
 };
 
-// Export pour utilisation dans d'autres modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = APP_CONFIG;
-}
+// Rendre disponible globalement pour compatibilité
+(window as any).APP_CONFIG = APP_CONFIG;

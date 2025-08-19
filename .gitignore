@@ -41,6 +41,7 @@ build
 BUILD_SUMMARY.md
 build-report-*.json
 RELEASE_GUIDE.md
+TYPESCRIPT_MIGRATION.md
 assets/README.md
 
 dist/

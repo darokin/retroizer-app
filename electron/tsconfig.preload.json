@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "none",
+    "sourceMap": false,
+    "strict": false,
+    "outDir": "../dist/js",
+    "rootDir": "../src/js",
+    "noEmitOnError": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "typeRoots": [
+      "../node_modules/@types"
+    ]
+  },
+  "include": [
+    "../src/js/preload.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

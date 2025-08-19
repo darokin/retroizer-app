@@ -1,6 +1,6 @@
 // =================================================================
 // == SCANLINES
-export const SCANLINES_DATA = {
+export const SCANLINES_DATA: any = {
     MODES: {
         SCANLINES_MODE_DARKEN_HARD      : "Darken hard",
         SCANLINES_MODE_DARKEN_SOFT      : "Darken soft",
@@ -35,9 +35,9 @@ SCANLINES_DATA.SCANLINES_TYPES = Object.values(SCANLINES_DATA.TYPES);
 SCANLINES_DATA.SCANLINES_COLORS = Object.values(SCANLINES_DATA.COLORS);
 
 // Exposer en global pour les scripts non-modules
-// if (typeof window !== 'undefined') {
-//     window.SCANLINES_DATA = SCANLINES_DATA;
-// }
+if (typeof window !== 'undefined') {
+    (window as any).SCANLINES_DATA = SCANLINES_DATA;
+}
 
 // ┌────────────────────────────┬────────────────────────────────────────────┐
 // │ TYPE                       │ DESCRIPTION                                │

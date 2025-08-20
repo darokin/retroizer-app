@@ -1,5 +1,15 @@
-// Configuration globale
+// =================================================================
+// == CONFIG =======================================================
+// =================================================================
+
 const APP_CONFIG = {
+    NAME: "RETROIZER",
+    VERSION: "1.0.0",
+    AUTHOR: "Adrien Rebuzzi (darokin)",
+    AUTHOR_EMAIL: "admin@darokin.info",
+    AUTHOR_WEBSITE: "https://darokin.info",
+    AUTHOR_GITHUB: "https://github.com/darokin",
+    
     // Dimensions de la fenêtre principale
     WINDOW: {
         WIDTH: 1400,

@@ -1,6 +1,5 @@
 import React from 'react';
 import { CollapsibleSection } from './CollapsibleSection';
-import { SCANLINES_DATA } from '../js/globals';
 
 export function ScanlinesSection({ settings, onUpdate }) {
   const handleChange = (field, value) => {
@@ -20,43 +19,30 @@ export function ScanlinesSection({ settings, onUpdate }) {
         </label>
       </div>
       
-      {/* {settings.scanlineMode && ( */}
       {settings.scanlines && (
         <>
-    
           <div className="control-group">
             <label>
-            Type:
-            <select
-                value={settings.scanlineType}
-                onChange={(e) => handleChange('scanlineMode', e.target.value)}
-            >
-                {SCANLINES_DATA.SCANLINES_MODES.map((val, i) => <option key={i} value={val}>{val}</option>)}
-            </select>
-            </label>
-          </div>
-
-          <div className="control-group">
-            <label>
-            Mode:
-            <select
+              Mode:
+              <select
                 value={settings.scanlineMode}
-                onChange={(e) => handleChange('scanlineMode', e.target.value)}
-            >
-                {SCANLINES_DATA.SCANLINES_MODES.map((val, i) => <option key={i} value={val}>{val}</option>)}
-            </select>
+                onChange={(e) => handleChange('scanlineMode', parseInt(e.target.value))}
+              >
+                {SCANLINES_DATA.SCANLINES_MODES.map((mode) => (
+                  <option key={mode.id} value={mode.id}>{mode.name}</option>
+                ))}
+              </select>
             </label>
           </div>
 
           <div className="control-group">
             <label>
               Color:
-              <select
+              <input
+                type="color"
                 value={settings.scanlineColor}
                 onChange={(e) => handleChange('scanlineColor', e.target.value)}
-              >
-                {SCANLINES_DATA.SCANLINES_COLORS.map((val, i) => <option key={i} value={val}>{val}</option>)}
-              </select>
+              />
             </label>
           </div>
 
@@ -78,5 +64,4 @@ export function ScanlinesSection({ settings, onUpdate }) {
       )}
     </CollapsibleSection>
   );
-} 
-//import APP_CONFIG from '../js/config';
+}

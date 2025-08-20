@@ -1,38 +1,169 @@
 // =================================================================
 // == SCANLINES
-export const SCANLINES_DATA = {
+const SCANLINES_DATA = {
+    //const blendModes = [BLEND, ADD, MULTIPLY, OVERLAY, SCREEN];
+    //blendModes ['source-over', 'lighter', 'multiply', 'overlay', 'screen']
     MODES: {
-        SCANLINES_MODE_DARKEN_HARD      : "Darken hard",
-        SCANLINES_MODE_DARKEN_SOFT      : "Darken soft",
-        SCANLINES_MODE_COLORIZE_VIVID   : "Colorize vivid",
-        SCANLINES_MODE_COLORIZE_SUBTLE  : "Colorize subtle",
-        SCANLINES_MODE_GLOW_STRIPE      : "Glow stripe",
-        SCANLINES_MODE_FADE_STRIPE      : "Fade stripe",
-        SCANLINES_MODE_NOISE_STRIPE     : "Noise stripe"
+        SCANLINES_MODE_DARKEN_HARD      : {
+            "id": 0,
+            "name": "Darken hard",
+            "description": "Contraste fort",
+            "blend": 2,
+            "opacity": 20
+        },
+        SCANLINES_MODE_DARKEN_SOFT      : {
+            "id": 1,
+            "name": "Darken soft",
+            "description": "Effet doux",
+            "blend": 3,
+            "opacity": 15
+        },
+        SCANLINES_MODE_COLORIZE_VIVID   : {
+            "id": 2,
+            "name": "Colorize vivid",
+            "description": "Lumineux sur zones sombres",
+            "blend": 3,
+            "opacity": 12
+        },
+        SCANLINES_MODE_COLORIZE_SUBTLE  : {
+            "id": 3,
+            "name": "Colorize subtle",
+            "description": "Doux sur zones claires",
+            "blend": 2,
+            "opacity": 10
+        },
+        SCANLINES_MODE_FADE_STRIPE      : {
+            "id": 4,
+            "name": "Fade stripe",
+            "description": "Effet diffus, peu contrasté",
+            "blend": 4,
+            "opacity": 6
+        },
+        SCANLINES_MODE_GLOW_STRIPE      : {
+            "id": 5,
+            "name": "Glow stripe",
+            "description": "Effet néon / synthwave",
+            "blend": 1,
+            "opacity": 8
+        },
+        SCANLINES_MODE_NOISE_STRIPE     : {
+            "id": 6,
+            "name": "Noise stripe",
+            "description": "Opacité aléatoire",
+            "blend": 3,
+            "opacity": 10
+        }
     },
     TYPES: {
-        SCANLINES_TYPE_HORIZ_HALF       : "Horizontal",
-        SCANLINES_TYPE_HORIZ_HALF_SOFT  : "Horizontal soft",
-        //SCANLINES_TYPE_HORIZ_FADE       : "1:3 Horizontal Fade",
-        SCANLINES_TYPE_VERT_HALF        : "Vertical",
-        SCANLINES_TYPE_VERT_HALF_SOFT   : "Vertical soft",
-        //SCANLINES_TYPE_VERT_FADE        : "1:3 Vertical Fade",
-        SCANLINES_TYPE_CROSS_HALF       : "Cross",
-        SCANLINES_TYPE_CHECKERS         : "Checkers"
+        SCANLINES_TYPE_HORIZ_HALF       : {
+            "id": 0,
+            "name": "Horizontal",
+            "description": "2 lignes sur 4 horizontales",
+            "matrix": [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1]
+            ]
+        },
+        SCANLINES_TYPE_HORIZ_HALF_SOFT  : {
+            "id": 1,
+            "name": "Horizontal soft",
+            "description": "2 lignes horizontales, opacité dégressive",
+            "matrix": [
+                [0, 0, 0, 0],
+                [0.2, 0.2, 0.2, 0.2],
+                [0.6, 0.6, 0.6, 0.6],
+                [1, 1, 1, 1]
+            ]
+        },
+        SCANLINES_TYPE_VERT_HALF        : {
+            "id": 2,
+            "name": "Vertical",
+            "description": "2 lignes sur 4 verticales",
+            "matrix": [
+                [0, 0, 1, 1],
+                [0, 0, 1, 1],
+                [0, 0, 1, 1],
+                [0, 0, 1, 1]
+            ]
+        },
+        SCANLINES_TYPE_VERT_HALF_SOFT   : {
+            "id": 3,
+            "name": "Vertical soft",
+            "description": "2 lignes verticales, opacité dégressive",
+            "matrix": [
+                [0, 0.2, 0.6, 1],
+                [0, 0.2, 0.6, 1],
+                [0, 0.2, 0.6, 1],
+                [0, 0.2, 0.6, 1]
+            ]
+        },
+        SCANLINES_TYPE_CROSS_HALF       : {
+            "id": 4,
+            "name": "Cross",
+            "description": "Croisement horizontal + vertical",
+            "matrix": [
+                [1, 1, 1, 1],
+                [1, 0, 0, 1],
+                [1, 0, 0, 1],
+                [1, 1, 1, 1]
+            ]
+        },
+        SCANLINES_TYPE_CHECKERS         : {
+            "id": 5,
+            "name": "Checkers",
+            "description": "Motif damier (1 sur 2 en X et Y)",
+            "matrix": [
+                [0, 0, 1, 1],
+                [0, 0, 1, 1],
+                [1, 1, 0, 0],
+                [1, 1, 0, 0]
+            ]
+        }
     },
     COLORS: {
-        SCANLINES_COLOR_RED             : "Red",
-        SCANLINES_COLOR_GREEN           : "Green",
-        SCANLINES_COLOR_BLUE            : "Blue",
-        SCANLINES_COLOR_CYAN            : "Cyan",
-        SCANLINES_COLOR_YELLOW          : "Yellow",
-        SCANLINES_COLOR_PINK            : "Pink"
+        SCANLINES_COLOR_RED             : {
+            "id": 0,
+            "name": "Red",
+            "color": "#ff0000"
+        },
+        SCANLINES_COLOR_GREEN           : {
+            "id": 1,
+            "name": "Green",
+            "color": "#00ff00"
+        },
+        SCANLINES_COLOR_BLUE            : {
+            "id": 2,
+            "name": "Blue",
+            "color": "#0000ff"
+        },
+        SCANLINES_COLOR_CYAN            : {
+            "id": 3,
+            "name": "Cyan",
+            "color": "#00ffff"
+        },
+        SCANLINES_COLOR_YELLOW          : {
+            "id": 4,
+            "name": "Yellow",
+            "color": "#ffff00"
+        },
+        SCANLINES_COLOR_PINK            : {
+            "id": 5,
+            "name": "Pink",
+            "color": "#ff00ff"
+        }
     }
 };
 
 SCANLINES_DATA.SCANLINES_MODES = Object.values(SCANLINES_DATA.MODES);
 SCANLINES_DATA.SCANLINES_TYPES = Object.values(SCANLINES_DATA.TYPES);
 SCANLINES_DATA.SCANLINES_COLORS = Object.values(SCANLINES_DATA.COLORS);
+
+// Export pour utilisation dans d'autres modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SCANLINES_DATA;
+}
 
 // Exposer en global pour les scripts non-modules
 // if (typeof window !== 'undefined') {

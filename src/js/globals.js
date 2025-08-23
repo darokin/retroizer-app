@@ -3,54 +3,55 @@
 const SCANLINES_DATA = {
     //const blendModes = [BLEND, ADD, MULTIPLY, OVERLAY, SCREEN];
     //blendModes ['source-over', 'lighter', 'multiply', 'overlay', 'screen']
+    
     MODES: {
         SCANLINES_MODE_DARKEN_HARD      : {
             "id": 0,
             "name": "Darken hard",
             "description": "Contraste fort",
-            "blend": 2,
+            "blend": 'multiply',
             "opacity": 20
         },
         SCANLINES_MODE_DARKEN_SOFT      : {
             "id": 1,
             "name": "Darken soft",
             "description": "Effet doux",
-            "blend": 3,
+            "blend": 'overlay',
             "opacity": 15
         },
         SCANLINES_MODE_COLORIZE_VIVID   : {
             "id": 2,
             "name": "Colorize vivid",
             "description": "Lumineux sur zones sombres",
-            "blend": 3,
+            "blend": 'overlay',
             "opacity": 12
         },
         SCANLINES_MODE_COLORIZE_SUBTLE  : {
             "id": 3,
             "name": "Colorize subtle",
             "description": "Doux sur zones claires",
-            "blend": 2,
+            "blend": 'multiply',
             "opacity": 10
         },
         SCANLINES_MODE_FADE_STRIPE      : {
             "id": 4,
             "name": "Fade stripe",
             "description": "Effet diffus, peu contrasté",
-            "blend": 4,
+            "blend": 'screen',
             "opacity": 6
         },
         SCANLINES_MODE_GLOW_STRIPE      : {
             "id": 5,
             "name": "Glow stripe",
             "description": "Effet néon / synthwave",
-            "blend": 1,
+            "blend": 'lighter',
             "opacity": 8
         },
         SCANLINES_MODE_NOISE_STRIPE     : {
             "id": 6,
             "name": "Noise stripe",
             "description": "Opacité aléatoire",
-            "blend": 3,
+            "blend": 'overlay',
             "opacity": 10
         }
     },

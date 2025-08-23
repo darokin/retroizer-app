@@ -29,7 +29,7 @@ const APP_CONFIG = {
     
     // Paramètres de rendu
     RENDER: {
-        PIXEL_SIZE: 2,
+        PIXEL_SIZE: 4,
         BACKGROUND_COLOR: [12, 12, 12]
     },
     

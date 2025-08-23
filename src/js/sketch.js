@@ -3,8 +3,6 @@ let imageProcessor;
 let renderGfx;
 let logoImage;
 
-const RENDER_PIXEL_SIZE = APP_CONFIG.RENDER.PIXEL_SIZE;
-
 function preload() {
     // logoImage = loadImage('assets/logo.png');
 }
@@ -42,8 +40,8 @@ function updateRender() {
     if (imageProcessor.originalImage && imageProcessor.processedPixels.length > 0) {
 
         const dimensions = imageProcessor.getProcessedDimensions();
-        const renderWidth = dimensions.width * RENDER_PIXEL_SIZE;
-        const renderHeight = dimensions.height * RENDER_PIXEL_SIZE;
+        const renderWidth = dimensions.width * APP_CONFIG.RENDER.PIXEL_SIZE;
+        const renderHeight = dimensions.height * APP_CONFIG.RENDER.PIXEL_SIZE;
 
         // == Destroy old GFX if size changes (loading new image)
         if (renderGfx && (renderGfx.width !== renderWidth || renderGfx.height !== renderHeight)) {
@@ -55,7 +53,7 @@ function updateRender() {
         if (!renderGfx) 
             renderGfx = createGraphics(renderWidth, renderHeight);
 
-        imageProcessor.updateRenderGraphics(renderGfx, RENDER_PIXEL_SIZE);
+        imageProcessor.updateRenderGraphics(renderGfx, APP_CONFIG.RENDER.PIXEL_SIZE);
 
         drawGfxToCanvas();
         displayImageInfo(dimensions, 5, 5);

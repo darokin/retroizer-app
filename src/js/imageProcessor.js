@@ -27,6 +27,7 @@ class ImageProcessor {
             ditheringNoise: 0,
             scanlines: false,
             scanlineMode: 0,
+            scanlineType: 0,
             scanlineColor: "#000000",
             scanlineOpacity: 20,
             overlayMode: 0,
@@ -274,24 +275,15 @@ class ImageProcessor {
             renderPixelSize = 4;
         }
 
-        // Vérifier si les scanlines sont activées et si le mode est valide
-        if (!this.settings.scanlines || !SCANLINES_DATA.SCANLINES_MODES[scanlineMode]) {
-            return;
-        }
-
         const mode = SCANLINES_DATA.SCANLINES_MODES[scanlineMode];
-        const type = SCANLINES_DATA.TYPES[scanlineType];
+        const type = SCANLINES_DATA.SCANLINES_TYPES[scanlineType];
         const alpha = this.map(scanlineOpacity, 0, 100, 0, 255);
-        const blendModes = [BLEND, ADD, MULTIPLY, OVERLAY, SCREEN];
         const matrix = type.matrix;
 
         // Convertir la couleur hex en RGB
-        const r = parseInt(scanlineColor.substr(1, 2), 16);
-        const g = parseInt(scanlineColor.substr(3, 2), 16);
-        const b = parseInt(scanlineColor.substr(5, 2), 16);
+        const { r, g, b } = this.getRGBFromHex(scanlineColor);
         
-        gfx.blendMode(blendModes[mode.blend]); // Mode par défaut pour les scanlines
-        gfx.fill(r, g, b, alpha);
+        gfx.blendMode(mode.blend); 
         gfx.noStroke();
         
         // Appliquer le pattern de scanlines
@@ -302,7 +294,8 @@ class ImageProcessor {
                 if (matrix[y][x] === 0) {
                     continue;
                 }
-                gfx.fill(r, g, b, scanlineOpacity * matrix[y][x]);
+                gfx.fill(r, g, b, alpha * matrix[y][x]);
+                //gfx.rect(pixel.x * renderPixelSize + x * scanlinePixelSize, pixel.y * renderPixelSize + y * scanlinePixelSize, scanlinePixelSize, scanlinePixelSize);
                 gfx.rect(pixel.x * renderPixelSize + x * scanlinePixelSize, pixel.y * renderPixelSize + y * scanlinePixelSize, scanlinePixelSize, scanlinePixelSize);
             }
         }
@@ -378,5 +371,12 @@ class ImageProcessor {
     
     getProcessedPixelsCount() {
         return this.processedPixels.length;
+    }
+
+    getRGBFromHex(hex) {
+        const r = parseInt(hex.substr(1, 2), 16);
+        const g = parseInt(hex.substr(3, 2), 16);
+        const b = parseInt(hex.substr(5, 2), 16);
+        return { r, g, b };
     }
 }

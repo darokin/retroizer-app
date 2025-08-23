@@ -37,6 +37,20 @@ export function ScanlinesSection({ settings, onUpdate }) {
 
           <div className="control-group">
             <label>
+              Type:
+              <select
+                value={settings.scanlineType}
+                onChange={(e) => handleChange('scanlineType', parseInt(e.target.value))}
+              >
+                {SCANLINES_DATA.SCANLINES_TYPES.map((type) => (
+                  <option key={type.id} value={type.id}>{type.name}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="control-group">
+            <label>
               Color:
               <input
                 type="color"

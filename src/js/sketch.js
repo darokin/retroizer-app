@@ -1,3 +1,6 @@
+// UIBridge is exposed globally, no need to import
+// import UIBridge from './UIBridge';
+
 // == Global variables
 let imageProcessor;
 let renderGfx;
@@ -25,6 +28,9 @@ function setup() {
     if (window.initPixertUI) {
         window.initPixertUI(imageProcessor, updateRender);
     }
+
+    // == Drag & Drop setup
+    setupDragAndDrop();
 
     displayWelcomeMessage();
 }
@@ -79,7 +85,7 @@ function displayWelcomeMessage() {
     
     textSize(18);
     fill(...APP_CONFIG.UI.ACCENT_COLOR, 255);
-    text('Click "Load Image" to start processing', width/2, height/2 - 20);
+    text('Click "Load Image" or drag & drop an image to start processing', width/2, height/2 - 20);
     
     textSize(14);
     fill(...APP_CONFIG.UI.SECONDARY_COLOR, 255);
@@ -250,3 +256,82 @@ window.addEventListener('beforeunload', function() {
     if (gui)
         gui.destroy();
 });
+
+// == Drag & Drop functionality
+function setupDragAndDrop() {
+    const canvas = document.querySelector('#p5-container canvas');
+    if (!canvas) return;
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        canvas.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        canvas.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        canvas.addEventListener(eventName, unhighlight, false);
+    });
+
+    // Handle dropped files
+    canvas.addEventListener('drop', handleDrop, false);
+}
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight(e) {
+    const canvas = document.querySelector('#p5-container canvas');
+    if (canvas) {
+        canvas.style.transition = 'all 0.3s ease';
+        canvas.style.margin = '20px';
+        canvas.style.borderRadius = '10px';
+        canvas.style.border = '32px dashed rgb(238, 255, 0)';
+        canvas.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+        canvas.style.boxShadow = '0 0 20px rgba(238, 255, 0, 0.5)';
+    }
+}
+
+function unhighlight(e) {
+    const canvas = document.querySelector('#p5-container canvas');
+    if (canvas) {
+        canvas.style.border = '';
+        canvas.style.borderRadius = '';
+        canvas.style.margin = '';
+        canvas.style.backgroundColor = '';
+        canvas.style.boxShadow = '';
+        canvas.style.transition = '';
+    }
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files.length > 0) {
+        const file = files[0];
+    
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+    
+          reader.onload = function(event) {
+            const imageData = event.target.result;
+            UIBridge.call('processLoadedImage', imageData, file.name);
+          };
+    
+          reader.onerror = function() {
+            UIBridge.call('updateStatus', 'Error reading file');
+            console.error('Error reading file');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          UIBridge.call('updateStatus', `Unsupported file type: ${file.type}`);
+        }
+    }
+}

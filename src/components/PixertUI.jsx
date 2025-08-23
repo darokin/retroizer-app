@@ -9,6 +9,8 @@ import { ExportSection } from './ExportSection';
 import { StatusBar } from './StatusBar';
 import { PaletteDisplay } from './PaletteDisplay';
 import { OriginalImageSection } from './OriginalImageSection';
+//// UIBridge is exposed globally, no need to import
+// import UIBridge from '../js/UIBridge';
 
 export function PixertUI({ imageProcessor, onUpdate }) {
   const [settings, setSettings] = useState(imageProcessor.settings);
@@ -37,6 +39,33 @@ export function PixertUI({ imageProcessor, onUpdate }) {
     setPalette(currentPalette);
   };
 
+  const processLoadedImage = (imageData, imagePath = '') => {
+    updateStatus('Loading image...');
+
+    // Load image with p5.js
+    loadImage(imageData, (img) => {
+        imageProcessor.setImage(img);
+        imageProcessor.base64Image = imageData;
+        const fileName = imagePath ? imagePath.split('/').pop() : 'Unknown';
+        updateStatus(`Image loaded: ${fileName} (${img.width}x${img.height})`);
+        updatePaletteDisplay();
+        onUpdate();
+    }, (error) => {
+        updateStatus('Error loading image');
+        console.error('Error loading image:', error);
+    });
+  };
+
+    useEffect(() => {
+        UIBridge.register('updateStatus', updateStatus);
+        UIBridge.register('processLoadedImage', processLoadedImage);
+    
+        return () => {
+            UIBridge.unregister('updateStatus');
+            UIBridge.unregister('processLoadedImage');
+        };
+    }, []);
+
   const handleLoadImage = async () => {
     try {
       if (!window.electronAPI) {
@@ -47,19 +76,7 @@ export function PixertUI({ imageProcessor, onUpdate }) {
       const result = await window.electronAPI.invoke('open-file-dialog');
       
       if (result) {
-        updateStatus('Loading image...');
-
-        // Load image with p5.js
-        loadImage(result.data, (img) => {
-            imageProcessor.setImage(img);
-            imageProcessor.base64Image = result.data;
-            updateStatus(`Image loaded: ${result.path.split('/').pop()} (${img.width}x${img.height})`);
-            updatePaletteDisplay();
-            onUpdate();
-        }, (error) => {
-            updateStatus('Error loading image');
-            console.error('Error loading image:', error);
-        });
+        processLoadedImage(result.data, result.path);
       }
     } catch (error) {
       console.error('Error opening file dialog:', error);

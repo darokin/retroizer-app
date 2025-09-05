@@ -38,9 +38,8 @@ class ImageProcessor {
     
     setImage(img) {
         this.originalImage = img;
-        if (img && img.loadPixels) {
-            img.loadPixels();
-        }
+
+        this.updateAvgPixels();
         this.processImage();
 
         // == Recalculate color limited palette with average color of the new pic and reprocess it
@@ -60,9 +59,16 @@ class ImageProcessor {
             || newSettings.paletteType != this.settings.paletteType
         );
 
+        // == Only recalculate average pixels colors if pixelsize change
+        const bUpdateAveragePixelsColors = (newSettings.pixelSize != this.settings.pixelSize);
+
         // == Update all settings
         Object.assign(this.settings, newSettings);
         
+        // == Update average pixels colors
+        if (bUpdateAveragePixelsColors)
+            this.updateAvgPixels();
+
         // == Update palette if necessary (with the new settings)
         if (bUpdatePalette)
             this.updatePalette();
@@ -71,14 +77,13 @@ class ImageProcessor {
         this.processImage();
     }
     
-    processImage() {
+    updateAvgPixels() {
         if (!this.originalImage) return;
-        
+
         // == Calculate size
         const pixelWidth = Math.floor(this.originalImage.width / this.settings.pixelSize);
         const pixelHeight = Math.floor(this.originalImage.height / this.settings.pixelSize);
         
-        this.processedPixels = [];
         this.pixelsColors = [];
         
         if (this.originalImage.loadPixels) {
@@ -90,6 +95,28 @@ class ImageProcessor {
             for (let x = 0; x < pixelWidth; x++) {
                 const pixelColor = this.getAverageColor(x, y, this.settings.pixelSize);
                 this.pixelsColors.push(pixelColor);
+            }
+        }
+    }
+
+    processImage() {
+        if (!this.originalImage) return;
+        
+        // == Calculate size
+        const pixelWidth = Math.floor(this.originalImage.width / this.settings.pixelSize);
+        const pixelHeight = Math.floor(this.originalImage.height / this.settings.pixelSize);
+        
+        this.processedPixels = [];
+        //this.pixelsColors = [];
+        
+        // if (this.originalImage.loadPixels) {
+        //     this.originalImage.loadPixels();
+        // }
+
+        // == Pixel by pixel processing
+        for (let y = 0; y < pixelHeight; y++) {
+            for (let x = 0; x < pixelWidth; x++) {
+                const pixelColor = this.pixelsColors[y * pixelWidth + x];
                 const processedColor = this.applyEffects(pixelColor, x, y);
                 this.processedPixels.push({x: x, y: y, color: processedColor});
             }
@@ -99,7 +126,7 @@ class ImageProcessor {
     getAverageColor(pixelX, pixelY, size) {
         const img = this.originalImage;
         let r = 0, g = 0, b = 0, count = 0;
-        
+
         const startX = pixelX * size;
         const startY = pixelY * size;
 

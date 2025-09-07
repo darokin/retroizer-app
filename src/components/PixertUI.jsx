@@ -59,10 +59,12 @@ export function PixertUI({ imageProcessor, onUpdate }) {
     useEffect(() => {
         UIBridge.register('updateStatus', updateStatus);
         UIBridge.register('processLoadedImage', processLoadedImage);
+        UIBridge.register('saveImage', handleSaveImage);
     
         return () => {
             UIBridge.unregister('updateStatus');
             UIBridge.unregister('processLoadedImage');
+            UIBridge.unregister('saveImage');
         };
     }, []);
 

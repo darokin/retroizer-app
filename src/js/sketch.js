@@ -59,7 +59,7 @@ function updateRender() {
         if (!renderGfx) 
             renderGfx = createGraphics(renderWidth, renderHeight);
 
-        imageProcessor.updateRenderGraphics(renderGfx, APP_CONFIG.RENDER.PIXEL_SIZE);
+        imageProcessor.updateRenderGraphics(renderGfx);
 
         drawGfxToCanvas();
         displayImageInfo(dimensions, 5, 5);
@@ -160,52 +160,10 @@ function keyPressed() {
     switch (key) {
         case 's':
         case 'S':
-            // Sauvegarder l'image
-            if (imageProcessor.originalImage) {
-                gui.saveImage();
-            }
+            UIBridge.call('saveImage');
             break;
-            
-        case 'r':
-        case 'R':
-            // Recharger/rafraîchir
-            updateRender();
-            break;
-            
-        case 'g':
-        case 'G':
-            // Toggle grayscale
-            imageProcessor.settings.grayscale = !imageProcessor.settings.grayscale;
-            if (imageProcessor.settings.grayscale) {
-                imageProcessor.settings.colorLimit = false;
-                imageProcessor.settings.customPalette = false;
-            }
-            gui.refreshGUI();
-            gui.updateProcessor();
-            break;
-            
-        case 'd':
-        case 'D':
-            // Toggle dithering
-            imageProcessor.settings.dithering = !imageProcessor.settings.dithering;
-            gui.refreshGUI();
-            gui.updateProcessor();
-            break;
-            
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-            // Changer la taille des pixels
-            const pixelSize = parseInt(key);
-            imageProcessor.settings.pixelSize = pixelSize;
-            gui.refreshGUI();
-            gui.updateProcessor();
-            break;
-            
-        case 'h':
         case 'H':
+        case 'h':
             // Afficher/cacher l'aide
             showHelpDialog();
             break;
@@ -214,13 +172,9 @@ function keyPressed() {
 
 function showHelpDialog() {
     const helpText = [
-        'Pixert - Keyboard Shortcuts:',
+        'Retroizer - Keyboard Shortcuts:',
         '',
         'S - Save image',
-        'R - Refresh render',
-        'G - Toggle grayscale',
-        'D - Toggle dithering',
-        '1-5 - Set pixel size',
         'H - Show this help',
         '',
         'Use the GUI panel on the left to access all features:'
@@ -245,17 +199,16 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
         error: error
     });
 
-    if (gui)
-        gui.updateStatus('ERROR : ', msg);
+    UIBridge.call('updateStatus', 'ERROR : ' + msg);
     
     return false;
 };
 
 // Closing cleanup
-window.addEventListener('beforeunload', function() {
-    if (gui)
-        gui.destroy();
-});
+// window.addEventListener('beforeunload', function() {
+//     if (gui)
+//         gui.destroy();
+// });
 
 // == Drag & Drop functionality
 function setupDragAndDrop() {

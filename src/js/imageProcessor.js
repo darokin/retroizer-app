@@ -1,3 +1,4 @@
+//const SCANLINES_DATA = require("./globals");
 
 class ImageProcessor {
     constructor() {
@@ -7,6 +8,9 @@ class ImageProcessor {
         this.pixelsColors = []; // only basic avg color pixel without effect (for color limited palette deduction)
         this.currentPalette = [];
         this.settings = this.getDefaultSettings();
+        this.scanlineGfx = null;
+        this.nbPixelsX = 0;
+        this.nbPixelsY = 0;
     }
     
     getDefaultSettings() {
@@ -39,6 +43,7 @@ class ImageProcessor {
     setImage(img) {
         this.originalImage = img;
 
+        this.updateNbPixels();
         this.updateAvgPixels();
         this.processImage();
 
@@ -60,29 +65,87 @@ class ImageProcessor {
         );
 
         // == Only recalculate average pixels colors if pixelsize change
-        const bUpdateAveragePixelsColors = (newSettings.pixelSize != this.settings.pixelSize);
+        const bUpdatePixelSize = (newSettings.pixelSize != this.settings.pixelSize);
+
+        // == Check if scanline data change
+        const bUpdateScanline = (
+            newSettings.scanlineType != this.settings.scanlineType
+            || newSettings.scanlineMode != this.settings.scanlineMode
+            || newSettings.scanlineColor != this.settings.scanlineColor
+        );
 
         // == Update all settings
         Object.assign(this.settings, newSettings);
         
         // == Update average pixels colors
-        if (bUpdateAveragePixelsColors)
+        if (bUpdatePixelSize) {
+            this.updateNbPixels();
             this.updateAvgPixels();
+        }
 
         // == Update palette if necessary (with the new settings)
         if (bUpdatePalette)
             this.updatePalette();
 
+        // == Update scanline gfx
+        if (bUpdateScanline || bUpdatePixelSize)
+            this.updateScanlineGfx();
+
         // == Update rendered image
         this.processImage();
     }
+
+    updateNbPixels() {
+        this.nbPixelsX = Math.floor(this.originalImage.width / this.settings.pixelSize);
+        this.nbPixelsY = Math.floor(this.originalImage.height / this.settings.pixelSize);
+    }
     
+    updateScanlineGfx() {
+        if (!this.scanlineGfx) {
+            this.scanlineGfx = createGraphics(this.nbPixelsX * APP_CONFIG.RENDER.PIXEL_SIZE, this.nbPixelsY * APP_CONFIG.RENDER.PIXEL_SIZE);
+            this.scanlineGfx.noStroke();
+        }
+
+        this.scanlineGfx.clear();
+
+        const type = SCANLINES_DATA.SCANLINES_TYPES[this.settings.scanlineType];
+        
+        let yStep = 0;
+        let xStep = 0;
+        let ySize = 0;
+        let xSize = 0;
+        switch (type) {
+            case SCANLINES_DATA.TYPES.SCANLINE_TYPE_HORIZONTAL_1_1:
+                yStep = APP_CONFIG.RENDER.PIXEL_SIZE;
+                ySize = APP_CONFIG.RENDER.PIXEL_SIZE;
+                break;
+            case SCANLINES_DATA.TYPES.SCANLINE_TYPE_HORIZONTAL_1_2:
+                yStep = APP_CONFIG.RENDER.PIXEL_SIZE;
+                ySize = APP_CONFIG.RENDER.PIXEL_SIZE / 2;
+                break;
+            case SCANLINES_DATA.TYPES.SCANLINE_TYPE_VERTICAL_1_1:
+                xStep = APP_CONFIG.RENDER.PIXEL_SIZE;
+                xSize = APP_CONFIG.RENDER.PIXEL_SIZE;
+                break;
+            case SCANLINES_DATA.TYPES.SCANLINE_TYPE_VERTICAL_1_2:
+                xStep = APP_CONFIG.RENDER.PIXEL_SIZE;
+                xSize = APP_CONFIG.RENDER.PIXEL_SIZE / 2;
+                break;
+        }
+
+        if (yStep > 0) {
+            for (let y = 0; y < this.nbPixelsY * this.settings.pixelSize; y+=yStep) {
+                this.scanlineGfx.rect(0, y, this.scanlineGfx.width, ySize);
+            }
+        } else if (xStep > 0) {
+            for (let x = 0; x < this.nbPixelsX * this.settings.pixelSize; x+=xStep) {
+                this.scanlineGfx.rect(x, 0, xSize, this.scanlineGfx.height);
+            }
+        }
+    }
+
     updateAvgPixels() {
         if (!this.originalImage) return;
-
-        // == Calculate size
-        const pixelWidth = Math.floor(this.originalImage.width / this.settings.pixelSize);
-        const pixelHeight = Math.floor(this.originalImage.height / this.settings.pixelSize);
         
         this.pixelsColors = [];
         
@@ -91,8 +154,8 @@ class ImageProcessor {
         }
 
         // == Pixel by pixel color deduction
-        for (let y = 0; y < pixelHeight; y++) {
-            for (let x = 0; x < pixelWidth; x++) {
+        for (let y = 0; y < this.nbPixelsY; y++) {
+            for (let x = 0; x < this.nbPixelsX; x++) {
                 const pixelColor = this.getAverageColor(x, y, this.settings.pixelSize);
                 this.pixelsColors.push(pixelColor);
             }
@@ -102,21 +165,12 @@ class ImageProcessor {
     processImage() {
         if (!this.originalImage) return;
         
-        // == Calculate size
-        const pixelWidth = Math.floor(this.originalImage.width / this.settings.pixelSize);
-        const pixelHeight = Math.floor(this.originalImage.height / this.settings.pixelSize);
-        
         this.processedPixels = [];
-        //this.pixelsColors = [];
-        
-        // if (this.originalImage.loadPixels) {
-        //     this.originalImage.loadPixels();
-        // }
 
         // == Pixel by pixel processing
-        for (let y = 0; y < pixelHeight; y++) {
-            for (let x = 0; x < pixelWidth; x++) {
-                const pixelColor = this.pixelsColors[y * pixelWidth + x];
+        for (let y = 0; y < this.nbPixelsY; y++) {
+            for (let x = 0; x < this.nbPixelsX; x++) {
+                const pixelColor = this.pixelsColors[y * this.nbPixelsX + x];
                 const processedColor = this.applyEffects(pixelColor, x, y);
                 this.processedPixels.push({x: x, y: y, color: processedColor});
             }
@@ -269,7 +323,7 @@ class ImageProcessor {
         };
     }
 
-    updateRenderGraphics(gfx, renderPixelSize = 8) {
+    updateRenderGraphics(gfx) {
         if (!this.processedPixels.length) return;
 
         gfx.noStroke();
@@ -279,22 +333,36 @@ class ImageProcessor {
         for (let pixel of this.processedPixels) {
             gfx.fill(pixel.color);
             gfx.rect(
-                pixel.x * renderPixelSize, 
-                pixel.y * renderPixelSize, 
-                renderPixelSize, 
-                renderPixelSize
+                pixel.x * APP_CONFIG.RENDER.PIXEL_SIZE, 
+                pixel.y * APP_CONFIG.RENDER.PIXEL_SIZE, 
+                APP_CONFIG.RENDER.PIXEL_SIZE, 
+                APP_CONFIG.RENDER.PIXEL_SIZE
             );
             
-            // == Scanlines
-            if (this.settings.scanlines)
-                this.applyScanlines(gfx, pixel, renderPixelSize);
+            // // == Scanlines
+            // if (this.settings.scanlines)
+            //     this.applyScanlines(gfx, pixel, APP_CONFIG.RENDER.PIXEL_SIZE);
         }
         
+            // == Scanlines
+        if (this.settings.scanlines)
+            this.applyScanlines(gfx);
+
         // == Overlay
         if (this.settings.overlayMode > 0)
             this.applyOverlay(gfx, gfx.width, gfx.height);
     }
-    
+
+    applyScanlines(gfx) {
+        const mode = SCANLINES_DATA.SCANLINES_MODES[this.settings.scanlineMode];
+        gfx.blendMode(mode.blend); 
+        gfx.tint(255, this.settings.scanlineOpacity);
+        gfx.image(this.scanlineGfx, 0, 0);
+        gfx.noTint();
+        gfx.blendMode(BLEND);
+    }
+
+    /*
     applyScanlines(gfx, pixel, renderPixelSize) {
         const { scanlineType, scanlineColor, scanlineMode, scanlineOpacity } = this.settings;
         
@@ -329,7 +397,8 @@ class ImageProcessor {
         
         gfx.blendMode(BLEND);
     }
-    
+    */
+
     applyOverlay(gfx, width, height) {
         const { overlayMode, overlayColor, overlayOpacity } = this.settings;
         

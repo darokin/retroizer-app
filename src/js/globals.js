@@ -56,7 +56,27 @@ const SCANLINES_DATA = {
         }
     },
     TYPES: {
-        SCANLINES_TYPE_HORIZ_HALF       : {
+        SCANLINE_TYPE_HORIZONTAL_1_1       : {
+            "id": 0,
+            "name": "Horizontal 1-1",
+            "description": "1 pixel sur deux horizontal"
+        },
+        SCANLINE_TYPE_HORIZONTAL_1_2       : {
+            "id": 1,
+            "name": "Horizontal 1-2",
+            "description": "1 demi pixel sur deux horizontal"
+        },
+        SCANLINE_TYPE_VERTICAL_1_1       : {
+            "id": 2,
+            "name": "Vertical 1-1",
+            "description": "1 pixel sur deux vertical"
+        },
+        SCANLINE_TYPE_VERTICAL_1_2       : {
+            "id": 3,
+            "name": "Vertical 1-2",
+            "description": "1 demi pixel sur deux vertical"
+        },
+        /*SCANLINES_TYPE_HORIZ_HALF       : {
             "id": 0,
             "name": "Horizontal",
             "description": "2 lignes sur 4 horizontales",
@@ -122,6 +142,7 @@ const SCANLINES_DATA = {
                 [1, 1, 0, 0]
             ]
         }
+        */
     },
     COLORS: {
         SCANLINES_COLOR_RED             : {

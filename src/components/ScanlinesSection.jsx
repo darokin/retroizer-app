@@ -48,7 +48,9 @@ export function ScanlinesSection({ settings, onUpdate }) {
               </select>
             </label>
           </div>
-
+                
+          {(settings.scanlineMode != SCANLINES_DATA.MODES.SCANLINES_MODE_DARKEN_HARD.id 
+            && settings.scanlineMode != SCANLINES_DATA.MODES.SCANLINES_MODE_DARKEN_SOFT.id) && (
           <div className="control-group">
             <label>
               Color:
@@ -59,7 +61,7 @@ export function ScanlinesSection({ settings, onUpdate }) {
               />
             </label>
           </div>
-
+          )}
           <div className="control-group">
             <label>
               Scanline Opacity:

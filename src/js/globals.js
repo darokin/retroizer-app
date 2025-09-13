@@ -46,13 +46,6 @@ const SCANLINES_DATA = {
             "description": "Effet néon / synthwave",
             "blend": 'lighter',
             "opacity": 8
-        },
-        SCANLINES_MODE_NOISE_STRIPE     : {
-            "id": 6,
-            "name": "Noise stripe",
-            "description": "Opacité aléatoire",
-            "blend": 'overlay',
-            "opacity": 10
         }
     },
     TYPES: {

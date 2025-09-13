@@ -69,7 +69,8 @@ class ImageProcessor {
 
         // == Check if scanline data change
         const bUpdateScanline = (
-            newSettings.scanlineType != this.settings.scanlineType
+            newSettings.scanlines != this.settings.scanlines
+            || newSettings.scanlineType != this.settings.scanlineType
             || newSettings.scanlineMode != this.settings.scanlineMode
             || newSettings.scanlineColor != this.settings.scanlineColor
         );
@@ -79,6 +80,9 @@ class ImageProcessor {
         
         // == Update average pixels colors
         if (bUpdatePixelSize) {
+            if (this.scanlineGfx)
+                this.scanlineGfx.remove();
+            this.scanlineGfx = null;
             this.updateNbPixels();
             this.updateAvgPixels();
         }
@@ -116,7 +120,7 @@ class ImageProcessor {
         let xSize = 0;
         switch (type) {
             case SCANLINES_DATA.TYPES.SCANLINE_TYPE_HORIZONTAL_1_1:
-                yStep = APP_CONFIG.RENDER.PIXEL_SIZE;
+                yStep = APP_CONFIG.RENDER.PIXEL_SIZE * 2;
                 ySize = APP_CONFIG.RENDER.PIXEL_SIZE;
                 break;
             case SCANLINES_DATA.TYPES.SCANLINE_TYPE_HORIZONTAL_1_2:
@@ -124,7 +128,7 @@ class ImageProcessor {
                 ySize = APP_CONFIG.RENDER.PIXEL_SIZE / 2;
                 break;
             case SCANLINES_DATA.TYPES.SCANLINE_TYPE_VERTICAL_1_1:
-                xStep = APP_CONFIG.RENDER.PIXEL_SIZE;
+                xStep = APP_CONFIG.RENDER.PIXEL_SIZE * 2;
                 xSize = APP_CONFIG.RENDER.PIXEL_SIZE;
                 break;
             case SCANLINES_DATA.TYPES.SCANLINE_TYPE_VERTICAL_1_2:
@@ -133,6 +137,11 @@ class ImageProcessor {
                 break;
         }
 
+        if (this.settings.scanlineMode != SCANLINES_DATA.SCANLINES_MODE_DARKEN_HARD && this.settings.scanlineMode != SCANLINES_DATA.SCANLINES_MODE_DARKEN_SOFT)
+            this.scanlineGfx.fill(this.settings.scanlineColor);
+        else
+            this.scanlineGfx.fill(0, 0, 0);
+       
         if (yStep > 0) {
             for (let y = 0; y < this.nbPixelsY * this.settings.pixelSize; y+=yStep) {
                 this.scanlineGfx.rect(0, y, this.scanlineGfx.width, ySize);
@@ -356,7 +365,7 @@ class ImageProcessor {
     applyScanlines(gfx) {
         const mode = SCANLINES_DATA.SCANLINES_MODES[this.settings.scanlineMode];
         gfx.blendMode(mode.blend); 
-        gfx.tint(255, this.settings.scanlineOpacity);
+        gfx.tint(255, this.settings.scanlineOpacity * 2.55);
         gfx.image(this.scanlineGfx, 0, 0);
         gfx.noTint();
         gfx.blendMode(BLEND);

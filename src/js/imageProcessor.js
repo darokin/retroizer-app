@@ -347,10 +347,6 @@ class ImageProcessor {
                 APP_CONFIG.RENDER.PIXEL_SIZE, 
                 APP_CONFIG.RENDER.PIXEL_SIZE
             );
-            
-            // // == Scanlines
-            // if (this.settings.scanlines)
-            //     this.applyScanlines(gfx, pixel, APP_CONFIG.RENDER.PIXEL_SIZE);
         }
         
             // == Scanlines
@@ -362,10 +358,11 @@ class ImageProcessor {
             this.applyOverlay(gfx, gfx.width, gfx.height);
     }
 
-    applyScanlines(gfx) {
+    applyScanlines(gfx, pixelSize = APP_CONFIG.RENDER.PIXEL_SIZE) {
         const mode = SCANLINES_DATA.SCANLINES_MODES[this.settings.scanlineMode];
         gfx.blendMode(mode.blend); 
         gfx.tint(255, this.settings.scanlineOpacity * 2.55);
+        gfx.scale(pixelSize / APP_CONFIG.RENDER.PIXEL_SIZE);
         gfx.image(this.scanlineGfx, 0, 0);
         gfx.noTint();
         gfx.blendMode(BLEND);
@@ -445,10 +442,10 @@ class ImageProcessor {
                 finalPixelSize,
                 finalPixelSize
             );
-            
-            if (this.settings.scanlines) 
-                this.applyScanlines(exportGfx, pixel, finalPixelSize);
         }
+
+        if (this.settings.scanlines) 
+            this.applyScanlines(exportGfx, finalPixelSize);
 
         if (this.settings.overlayMode > 0)
             this.applyOverlay(exportGfx, exportGfx.width, exportGfx.height);

@@ -25,22 +25,17 @@ const BAYER_MATRICES = {
 const DITHERING_NAMES = Object.keys(BAYER_MATRICES);
 
 // Fonction pour obtenir la valeur de Bayer à une position donnée
-function getBayerValue(matrixName, x, y) {
+function getBayerValue(matrixName, x, y, factor = 32) {
     const matrix = BAYER_MATRICES[matrixName];
     if (!matrix) return 0;
     
     const size = matrix.length;
 
-    return (matrix[y % size][x % size] / (size * size)) * 32;
-}
-
-// Application du dithering de Bayer
-function applyBayerDithering(colorValue, matrixName, x, y) {
-    const threshold = getBayerValue(matrixName, x, y);
-    return colorValue + threshold;
+    return (matrix[y % size][x % size] / (size * size)) * factor;
 }
 
 // Dithering Floyd-Steinberg (diffusion d'erreur)
+/*
 function applyFloydSteinbergDithering(imageData, width, height, palette) {
     const pixels = [...imageData];
     
@@ -88,6 +83,7 @@ function applyFloydSteinbergDithering(imageData, width, height, palette) {
     
     return pixels;
 }
+*/
 
 // Conversion en niveaux de gris avec pondération
 function toGrayscale(r, g, b) {

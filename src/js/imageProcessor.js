@@ -29,6 +29,7 @@ class ImageProcessor {
             dithering: false,
             ditheringType: 'Bayer 2x2',
             ditheringNoise: 0,
+            ditheringFactor: 32,
             scanlines: false,
             scanlineMode: 0,
             scanlineType: 0,
@@ -251,6 +252,7 @@ class ImageProcessor {
             let grayValue = toGrayscale(r, g, b);
             
             if (this.settings.dithering) {
+                // TODO : Refactor between noise outisde and inside applyGrayscaleDithering()...
                 if (this.settings.ditheringNoise > 0) {
                     grayValue += (Math.random() - 0.5) * this.settings.ditheringNoise;
                 }
@@ -262,7 +264,7 @@ class ImageProcessor {
         } else if (this.settings.colorLimit || this.settings.customPalette) {
 
             if (this.settings.dithering) {
-                const bayerValue = getBayerValue(this.settings.ditheringType, x, y);
+                const bayerValue = getBayerValue(this.settings.ditheringType, x, y, this.settings.ditheringFactor);
                 r += bayerValue;
                 g += bayerValue;
                 b += bayerValue;
@@ -349,7 +351,7 @@ class ImageProcessor {
             );
         }
         
-            // == Scanlines
+        // == Scanlines
         if (this.settings.scanlines)
             this.applyScanlines(gfx);
 

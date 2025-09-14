@@ -55,6 +55,23 @@ export function DitheringSection({ settings, onUpdate }) {
             </label>
           </div>
           
+          {!settings.grayscale && (
+          <div className="control-group">
+            <label>
+              Dithering Factor:
+              <input
+                type="range"
+                min="8"
+                max="256"
+                step="8"
+                value={settings.ditheringFactor}
+                onChange={(e) => handleChange('ditheringFactor', parseInt(e.target.value))}
+              />
+              <span className="value">{settings.ditheringFactor}</span>
+            </label>
+          </div>
+          )}
+
           <div className="control-group">
             <label>
               Noise Level:

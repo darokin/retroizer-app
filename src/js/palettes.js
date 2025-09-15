@@ -105,16 +105,21 @@ function findNearestColor(targetColor, palette) {
     const tb = blue(targetColor);
     
     for (let i = 0; i < palette.length; i++) {
-        const pr = palette[i][0];
-        const pg = palette[i][1];
-        const pb = palette[i][2];
+        // const pr = palette[i][0];
+        // const pg = palette[i][1];
+        // const pb = palette[i][2];
         
-        const distance = Math.sqrt(
-            Math.pow(tr - pr, 2) + 
-            Math.pow(tg - pg, 2) + 
-            Math.pow(tb - pb, 2)
-        );
+        // const distance = Math.sqrt(
+        //     Math.pow(tr - pr, 2) + 
+        //     Math.pow(tg - pg, 2) + 
+        //     Math.pow(tb - pb, 2)
+        // );
         
+        const dr = tr - palette[i][0];
+        const dg = tg - palette[i][1];
+        const db = tb - palette[i][2];
+        const distance = (dr * dr) + (dg * dg) + (db * db);
+
         if (distance < bestDistance) {
             bestDistance = distance;
             bestColor = palette[i];

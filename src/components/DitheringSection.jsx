@@ -17,7 +17,8 @@ const DITHERING_NAMES = [
 const DITHERING_NAMES = [
     'Bayer 2x2',
     'Bayer 4x4',
-    'Bayer 8x8'
+    'Bayer 8x8',
+    'Bayer 16x16'
 ];
   
 

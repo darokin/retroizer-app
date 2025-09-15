@@ -247,12 +247,13 @@ class ImageProcessor {
             b = Math.floor(255 * Math.pow(b / 255, gammaCorrection));
         }
         
+        let finalColor = color(r, g, b);
+
         // == Grayscale
         if (this.settings.grayscale) {
             let grayValue = toGrayscale(r, g, b);
             
             if (this.settings.dithering) {
-                // TODO : Refactor between noise outisde and inside applyGrayscaleDithering()...
                 if (this.settings.ditheringNoise > 0) {
                     grayValue += (Math.random() - 0.5) * this.settings.ditheringNoise;
                 }
@@ -260,34 +261,30 @@ class ImageProcessor {
             }
             
             r = g = b = this.constrain(grayValue, 0, 255);
+            finalColor = color(r, g, b);
 
         } else if (this.settings.colorLimit || this.settings.customPalette) {
-
             if (this.settings.dithering) {
-                const bayerValue = getBayerValue(this.settings.ditheringType, x, y, this.settings.ditheringFactor);
-                r += bayerValue;
-                g += bayerValue;
-                b += bayerValue;
-                
+                const bayerValue = getBayerValue(this.settings.ditheringType, x, y);
+
+                // Ajouter le bruit si spécifié
                 if (this.settings.ditheringNoise > 0) {
                     r += (Math.random() - 0.5) * this.settings.ditheringNoise;
                     g += (Math.random() - 0.5) * this.settings.ditheringNoise;
                     b += (Math.random() - 0.5) * this.settings.ditheringNoise;
                 }
-                
-                r = this.constrain(r, 0, 255);
-                g = this.constrain(g, 0, 255);
-                b = this.constrain(b, 0, 255);
+        
+                let offset = this.settings.ditheringFactor * (bayerValue - 0.5); // centré vers zéro
+                r = this.constrain(r + offset, 0, 255);
+                g = this.constrain(g + offset, 0, 255);
+                b = this.constrain(b + offset, 0, 255);
+
+                finalColor = color(r, g, b);
             }
-        }
-        
-        let finalColor = color(r, g, b);
-        
-        // == Palette nearest color
-        if ((this.settings.colorLimit || this.settings.customPalette) && this.currentPalette.length > 0) {
+            
             finalColor = findNearestColor(finalColor, this.currentPalette);
         }
-        
+
         return finalColor;
     }
     

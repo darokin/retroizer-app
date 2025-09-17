@@ -36,7 +36,7 @@ class ImageProcessor {
             scanlineColor: "#000000",
             scanlineOpacity: 20,
             overlayMode: 0,
-            overlayColor: [255, 0, 255],
+            overlayColor: "#ff00ff",
             overlayOpacity: 50
         };
     }
@@ -76,9 +76,20 @@ class ImageProcessor {
             || newSettings.scanlineColor != this.settings.scanlineColor
         );
 
-        // == Update all settings
+        // == Check if overlay data change
+        const bUpdatePixelOutputSize = (
+            newSettings.outputPixelSize != this.settings.outputPixelSize
+        );
+
+        // =========================
+        // == Update all settings ==
+        // =========================
         Object.assign(this.settings, newSettings);
         
+        // == If only output pixel size changes, don't need to update anything else
+        if (bUpdatePixelOutputSize) {
+            return;
+        }
         // == Update average pixels colors
         if (bUpdatePixelSize) {
             if (this.scanlineGfx)
@@ -411,7 +422,7 @@ class ImageProcessor {
         
         if (overlayMode > 0 && overlayMode < blendModes.length) {
             gfx.blendMode(blendModes[overlayMode]);
-            gfx.fill(overlayColor[0], overlayColor[1], overlayColor[2], overlayOpacity);
+            gfx.fill(red(overlayColor), green(overlayColor), blue(overlayColor), overlayOpacity * 2.55);
             gfx.rect(0, 0, width, height);
             gfx.blendMode(BLEND);
         }

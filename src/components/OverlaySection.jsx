@@ -6,10 +6,8 @@ export function OverlaySection({ settings, onUpdate }) {
     onUpdate({ ...settings, [field]: value });
   };
 
-  const handleColorChange = (index, value) => {
-    const newColor = [...settings.overlayColor];
-    newColor[index] = parseInt(value);
-    handleChange('overlayColor', newColor);
+  const handleColorChange = (value) => {
+    handleChange('overlayColor', value);
   };
 
   return (
@@ -33,33 +31,14 @@ export function OverlaySection({ settings, onUpdate }) {
       {settings.overlayMode > 0 && (
         <>
           <div className="control-group">
-            <label>Overlay Color (RGB):</label>
-            <div className="color-inputs">
+            <label>
+              Color:
               <input
-                type="number"
-                min="0"
-                max="255"
-                value={settings.overlayColor[0]}
-                onChange={(e) => handleColorChange(0, e.target.value)}
-                placeholder="R"
+                type="color"
+                value={settings.overlayColor}
+                onChange={(e) => handleColorChange(e.target.value)}
               />
-              <input
-                type="number"
-                min="0"
-                max="255"
-                value={settings.overlayColor[1]}
-                onChange={(e) => handleColorChange(1, e.target.value)}
-                placeholder="G"
-              />
-              <input
-                type="number"
-                min="0"
-                max="255"
-                value={settings.overlayColor[2]}
-                onChange={(e) => handleColorChange(2, e.target.value)}
-                placeholder="B"
-              />
-            </div>
+            </label>
           </div>
           
           <div className="control-group">

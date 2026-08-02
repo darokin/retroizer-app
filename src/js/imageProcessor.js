@@ -200,7 +200,7 @@ class ImageProcessor {
     
     getAverageColor(pixelX, pixelY, size) {
         const img = this.originalImage;
-        let r = 0, g = 0, b = 0, count = 0;
+        let r = 0, g = 0, b = 0, a = 0, count = 0;
 
         const startX = pixelX * size;
         const startY = pixelY * size;
@@ -217,16 +217,18 @@ class ImageProcessor {
                 r += img.pixels[index];
                 g += img.pixels[index + 1];
                 b += img.pixels[index + 2];
+                a += img.pixels[index + 3];
                 count++;
             }
         }
         
-        if (count === 0) return color(0, 0, 0);
+        if (count === 0) return color(0, 0, 0, 0);
         
         return color(
             Math.floor(r / count),
             Math.floor(g / count),
-            Math.floor(b / count)
+            Math.floor(b / count),
+            Math.floor(a / count)
         );
     }
     
@@ -234,7 +236,13 @@ class ImageProcessor {
         let r = red(inputColor);
         let g = green(inputColor);
         let b = blue(inputColor);
+        let a = alpha(inputColor);
         
+        // == Handle transparent pixels
+        if (a <= 20) {
+            return color(0, 0, 0, 0);
+        }
+
         // == Brighness
         if (this.settings.brightness !== 0) {
             r = this.constrain(r + this.settings.brightness, 0, 255);
@@ -346,7 +354,7 @@ class ImageProcessor {
         if (!this.processedPixels.length) return;
 
         gfx.noStroke();
-        gfx.background(0);
+        gfx.clear();
        
         // == Pixels processing
         for (let pixel of this.processedPixels) {
@@ -442,7 +450,7 @@ class ImageProcessor {
         );
         
         exportGfx.noStroke();
-        exportGfx.background(0);
+        exportGfx.clear();
         
         for (let pixel of this.processedPixels) {
           exportGfx.fill(pixel.color);

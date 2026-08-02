@@ -103,6 +103,7 @@ function findNearestColor(targetColor, palette) {
     const tr = red(targetColor);
     const tg = green(targetColor);
     const tb = blue(targetColor);
+    const ta = alpha(targetColor);
     
     for (let i = 0; i < palette.length; i++) {
         // const pr = palette[i][0];
@@ -126,7 +127,7 @@ function findNearestColor(targetColor, palette) {
         }
     }
     
-    return color(bestColor[0], bestColor[1], bestColor[2]);
+    return color(bestColor[0], bestColor[1], bestColor[2], ta);
 }
 
 // Algorithme K-means pour quantification des couleurs

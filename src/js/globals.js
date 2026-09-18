@@ -1,4 +1,6 @@
 // =================================================================
+const ALPHA_THRESHOLD = 20;
+
 // == SCANLINES
 const SCANLINES_DATA = {
     //const blendModes = [BLEND, ADD, MULTIPLY, OVERLAY, SCREEN];

@@ -239,7 +239,7 @@ class ImageProcessor {
         let a = alpha(inputColor);
         
         // == Handle transparent pixels
-        if (a <= 20) {
+        if (a <= ALPHA_THRESHOLD) {
             return color(0, 0, 0, 0);
         }
 
@@ -286,7 +286,7 @@ class ImageProcessor {
             if (this.settings.dithering) {
                 const bayerValue = getBayerValue(this.settings.ditheringType, x, y);
 
-                // Ajouter le bruit si spécifié
+                // == Add noise if enabled
                 if (this.settings.ditheringNoise > 0) {
                     r += (Math.random() - 0.5) * this.settings.ditheringNoise;
                     g += (Math.random() - 0.5) * this.settings.ditheringNoise;
